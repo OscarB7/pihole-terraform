@@ -1,0 +1,51 @@
+version: "3"
+
+services:
+  wireguard:
+    container_name: wireguard
+    build: .
+    image: wg:latest
+    depends_on:
+      - pihole
+    networks:
+      - private
+    ports:
+      - "${WG_PORT:-51820}:51820/udp"
+    environment:
+      - WG_INT_PRIVATE_KEY=${WG_INT_PRIVATE_KEY}
+      - WG_INT_IP=${WG_INT_IP:-10.6.0.1/24}
+      - WG_PEER_PUBLIC_KEY=${WG_PEER_PUBLIC_KEY}
+      - WG_PEER_IP=${WG_PEER_IP:-10.6.0.2/32}
+    cap_add:
+      - NET_ADMIN
+      - SYS_MODULE
+    restart: unless-stopped
+
+  pihole:
+    container_name: pihole
+    image: pihole/pihole:latest
+    networks:
+      private:
+        ipv4_address: ${PIHOLE_IP:-172.23.0.101}
+    ports:
+      - "${PIHOLE_DNS_PORT:-53}:53/tcp"
+      - "${PIHOLE_DNS_PORT:-53}:53/udp"
+      - "${PIHOLE_WEB_PORT:-80}:80/tcp"
+    environment:
+      - TZ=${TZ:-America/New_York}
+      - WEBPASSWORD=${WEBPASSWORD}
+      - PIHOLE_DNS_=${PIHOLE_DNS_:-1.1.1.1}
+    volumes:
+      - './docker-vol/etc-pihole/:/etc/pihole/'
+      - './docker-vol/etc-dnsmasq.d/:/etc/dnsmasq.d/'
+    cap_add:
+      - NET_ADMIN
+    restart: unless-stopped
+
+
+networks:
+  private:
+    ipam:
+      driver: default
+      config:
+        - subnet: "${DOCKER_COMPOSE_NETWORK_RANGE:-172.23.0.0/24}"
