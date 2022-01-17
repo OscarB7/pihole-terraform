@@ -15,7 +15,7 @@ EOF
 [[ -e '.env' ]] && source .env
 
 # set docker network ip range
-[[ ! -z $DOCKER_NETWORK_RANGE ]] && echo "{ \"default-address-pools\": [ {\"base\":\"$DOCKER_NETWORK_RANGE\",\"size\":24} ] }" > /etc/docker/daemon.json
+echo "{ \"default-address-pools\": [ {\"base\":\"${DOCKER_NETWORK_RANGE:-10.7.0.0/16}\",\"size\":24} ] }" > /etc/docker/daemon.json
 
 ## Install Docker
 apt-get remove docker docker-engine docker.io containerd runc
@@ -31,9 +31,9 @@ else
     docker_compose_version="v$DOCKER_COMPOSE_VERSION"
 fi
 curl -L "https://github.com/docker/compose/releases/download/${docker_compose_version}/docker-compose-${host_details,,}" -o /usr/local/bin/docker-compose
-chmod +x /usr/local/bin/docker-compose
+chmod -v +x /usr/local/bin/docker-compose
 
-mkdir ./docker-vol/{etc-pihole,etc-dnsmasq.d}
+mkdir -vp ./docker-vol/{etc-pihole,etc-dnsmasq.d}
 
 ## start services
 docker-compose up -d

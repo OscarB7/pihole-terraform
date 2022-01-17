@@ -14,6 +14,7 @@ services:
     environment:
       - WG_INT_PRIVATE_KEY=${WG_INT_PRIVATE_KEY}
       - WG_INT_IP=${WG_INT_IP:-10.6.0.1/24}
+      - WG_INT_PORT=${WG_INT_PORT:-51820}
       - WG_PEER_PUBLIC_KEY=${WG_PEER_PUBLIC_KEY}
       - WG_PEER_IP=${WG_PEER_IP:-10.6.0.2/32}
     cap_add:

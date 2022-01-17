@@ -61,7 +61,6 @@ CMD \
         # add iptables rules to forward traffic to Pi-hole \
         iptables -t nat -A PREROUTING -d ${pihole_ip} -j ACCEPT -m comment --comment "Accept inbound traffic for Pi-hole" && \
         iptables -t nat -A POSTROUTING -o ${docker_net_if} -j MASQUERADE -m comment --comment "Allow outbound traffic to the docker network" && \
-        # iptables -t nat -nvL && \
         # get public IP of the wg server \
         server_public_ip=`timeout 2 wget -q -O - https://ifconfig.co/ip` && \
         # print peer wg configuration \
