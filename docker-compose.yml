@@ -34,8 +34,8 @@ services:
       - "${PIHOLE_WEB_PORT:-80}:80/tcp"
     environment:
       - TZ=${TZ:-America/New_York}
-      - WEBPASSWORD=${WEBPASSWORD}
-      - PIHOLE_DNS_=${PIHOLE_DNS_:-1.1.1.1}
+      - WEBPASSWORD=${PIHOLE_WEBPASSWORD}
+      - PIHOLE_DNS_=${PIHOLE_DNS_IP:-1.1.1.1}
     volumes:
       - './docker-vol/etc-pihole/:/etc/pihole/'
       - './docker-vol/etc-dnsmasq.d/:/etc/dnsmasq.d/'
