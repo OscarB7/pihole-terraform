@@ -7,11 +7,11 @@ RUN \
     apk add wireguard-tools
 
 ENV \
-    WG_INT_PRIVATE_KEY='' \
-    WG_INT_IP='10.6.0.1/24' \
-    WG_INT_PORT='51820' \
-    WG_PEER_PUBLIC_KEY='' \
-    WG_PEER_IP='10.6.0.2/32' \
+    WG_SERVER_PRIVATE_KEY='' \
+    WG_SERVER_IP='10.6.0.1/24' \
+    WG_SERVER_PORT='51820' \
+    WG_CLIENT_PUBLIC_KEY='' \
+    WG_CLIENT_IP='10.6.0.2/32' \
     DNS_CONTAINER_NAME='pihole'
 
 COPY setup_wg.sh .
