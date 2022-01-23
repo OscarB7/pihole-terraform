@@ -12,5 +12,4 @@ docker-vol
 **/server.publickey
 **/peer.privatekey
 **/peer.publickey
-**/id_rsa
-**/id_rsa.pub
+**/id_rsa*

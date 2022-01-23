@@ -1,0 +1,40 @@
+#!/bin/bash
+
+# update and clone repo
+apt-get update &>/opt/1_update_on_boot &&\
+    DEBIAN_FRONTEND=noninteractive \
+    apt-get -o "Dpkg::Options::=--force-confold" dist-upgrade -y --allow &>/opt/2_upgrade_on_boot &&\
+    touch /opt/3_updated_on_boot
+cd /opt
+git clone https://github.com/OscarB7/pihole-terraform.git &>/opt/4_git_on_boot
+cd pihole-terraform/
+
+# create dot env file for setup_host.sh script and docker compose
+cat << EOF > .env
+## ----- setup script -----
+DOCKER_COMPOSE_VERSION=${docker_compose_version}
+DOCKER_NETWORK_RANGE=${docker_network_range}
+
+## ----- docker compose -----
+DOCKER_COMPOSE_NETWORK_RANGE=${docker_compose_network_range}
+PIHOLE_IP=${pihole_ip}
+PIHOLE_DNS_PORT=${pihole_dns_port}
+PIHOLE_WEB_PORT=${pihole_web_port}
+WG_PORT=${wg_port}
+
+## ----- wireguard -----
+WG_SERVER_PRIVATE_KEY=${wg_server_private_key}
+WG_SERVER_IP=${wg_server_ip}
+WG_SERVER_PORT=${wg_server_port}
+WG_CLIENT_PUBLIC_KEY=${wg_client_public_key}
+WG_CLIENT_IP=${wg_client_ip}
+
+## ----- pihole -----
+TZ=${tz}
+PIHOLE_WEBPASSWORD=${pihole_webpassword}
+PIHOLE_DNS_IP=${pihole_dns_ip}
+PIHOLE_DNS_IP=${pihole_dns_ip}
+EOF
+
+# set up instance
+bash setup_host.sh &>/opt/5_setup_on_boot && touch /opt/6_done_on_boot || touch /opt/6_failed_setup
