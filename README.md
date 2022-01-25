@@ -129,7 +129,7 @@ Here we will create the `terraform/terraform.tfvars` file and explain how to obt
     docker build --tag wg:latest .
 
     # run the container and access it
-    docker run --rm -it --name temp wg:latest sh
+    docker run -it --name temp wg:latest sh
 
     # create the keys inside the container
     umask 077; wg genkey | tee server.privatekey | wg pubkey > server.publickey
@@ -141,6 +141,8 @@ Here we will create the `terraform/terraform.tfvars` file and explain how to obt
     docker container cp temp:/etc/wireguard/server.publickey .
     docker container cp temp:/etc/wireguard/client.privatekey .
     docker container cp temp:/etc/wireguard/client.publickey .
+
+    docker rm -f temp
     ```
 
 6. Create SSH keys.
@@ -149,7 +151,7 @@ Here we will create the `terraform/terraform.tfvars` file and explain how to obt
 
     ```shell
     # run the container and access it
-    docker run --rm -it --name temp --user root ubuntu:latest bash
+    docker run -it --name temp --user root ubuntu:latest bash
     
     # install openssh
     apt update && apt install -y openssh-client
@@ -163,6 +165,8 @@ Here we will create the `terraform/terraform.tfvars` file and explain how to obt
     # copy the keys from the container to your machine
     docker container cp temp:/root/.ssh/id_rsa .
     docker container cp temp:/root/.ssh/id_rsa.pub .
+
+    docker rm -f temp
     ```
 
 7. Get your home public IP address.
@@ -291,6 +295,7 @@ cd /tf
 terraform init
 terraform apply
 # read the output from terraform and respond 'yes' to confirm you want to create the resources
+exit
 ```
 
 After finishing the deployment, you can read the public IP of the OCI instance from `instance_public_ip` and the Pi-hole DNS and web console ports, `port_pihole_dns` and `port_pihole_web` (we will refer to this information later). Here is an example of the output:
@@ -325,15 +330,15 @@ You can destroy/remove the resources you created with Terraform at any moment. N
 Below is the process if you deployed using [local Terraform](#local-terraform).
 
 ```shell
-# if you destroyed the tf container
-docker run --rm -it --name tf --mount type=bind,source="$(pwd)"/terraform,target=/tf --entrypoint sh hashicorp/terraform:1.1.4
+# in case the tf container is still running
+docker rm -f tf
 
-# if the tf container is still running
-docker exec -it tf sh
+docker run --rm -it --name tf --mount type=bind,source="$(pwd)"/terraform,target=/tf --entrypoint sh hashicorp/terraform:1.1.4
 
 cd /tf
 terraform destroy
 # read the output from terraform and respond 'yes' to confirm you want to delete the resources
+exit
 ```
 
 If you deployed this project using [Terraform Cloud](#terraform-cloud), the tutorial linked in that section explains how to destroy the resources.

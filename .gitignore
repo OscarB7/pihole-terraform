@@ -10,6 +10,6 @@ docker-vol
 **/*.pem
 **/server.privatekey
 **/server.publickey
-**/peer.privatekey
-**/peer.publickey
+**/client.privatekey
+**/client.publickey
 **/id_rsa*
