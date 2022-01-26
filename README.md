@@ -256,7 +256,7 @@ Here we will create the `terraform/terraform.tfvars` file and explain how to obt
         Time zone. You can see valid values for this variable by running this command in Linux/Mac `timedatectl list-timezones` or on [this](https://gist.github.com/adamgen/3f2c30361296bbb45ada43d83c1ac4e5#file-timedatectl-list-timezones) page.
     - **pihole_webpassword**: [*REQUIRED*]  
         Password to access the Pi-hole web console.  
-        Generate a strong password. Avoid these characters: `=` and `;`
+        Generate a strong password. Avoid these characters: `=`, `$`, and `;`
     - **pihole_dns_ip**: [*Default:* `1.1.1.1`]  
         DNS server sed by Pi-hole.
         You can set more than one by separating DNS servers with `,` and leaving no spaces around it.
