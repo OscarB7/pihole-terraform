@@ -97,6 +97,12 @@ variable "your_home_public_ip" {
   sensitive = true
 }
 
+variable "reserved_public_ip" {
+  type      = string
+  sensitive = false
+  default   = "pihole-wireguard-public-ip"
+}
+
 # Instance
 
 variable "instance_shape" {
