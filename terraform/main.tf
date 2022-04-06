@@ -105,8 +105,13 @@ resource "oci_core_subnet" "public_subnet" {
 }
 
 
-# TODO: create elastic IP for OCI and use it for this instance
 # TODO: create a key to encrypt boot volume. kmsKeyId
+
+resource "oci_core_public_ip" "reserved_public_ip" {
+  compartment_id = var.oci_tenancy_ocid
+  lifetime       = "RESERVED"
+  display_name   = var.reserved_public_ip
+}
 
 
 data "oci_core_images" "ubuntu_image" {
@@ -125,7 +130,8 @@ resource "oci_core_instance" "pihole_wireguard" {
   compartment_id      = var.oci_tenancy_ocid
   shape               = var.instance_shape
   create_vnic_details {
-    subnet_id = oci_core_subnet.public_subnet.id
+    subnet_id        = oci_core_subnet.public_subnet.id
+    assign_public_ip = oci_core_public_ip.reserved_public_ip.id
   }
   display_name = var.instance_display_name
   metadata = {
