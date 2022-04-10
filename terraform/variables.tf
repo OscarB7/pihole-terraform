@@ -28,6 +28,45 @@ variable "oci_private_key_base64" {
 
 # ----- resources -----
 
+# Base/Shared
+
+variable "oci_vcn_id" {
+  type      = string
+  sensitive = false
+  default   = null
+}
+
+variable "oci_internet_gateway_id" {
+  type      = string
+  sensitive = false
+  default   = null
+}
+
+variable "oci_route_table_id" {
+  type      = string
+  sensitive = false
+  default   = null
+}
+
+variable "oci_security_list_id" {
+  type      = string
+  sensitive = false
+  default   = null
+}
+
+variable "oci_subnet_id" {
+  type      = string
+  sensitive = false
+  default   = null
+}
+
+variable "oci_image_id" {
+  type      = string
+  sensitive = false
+  default   = null
+}
+
+
 # VCN
 
 variable "vcn_cidr_blocks" {
@@ -132,7 +171,7 @@ variable "instance_shape_config_memory_in_gbs" {
 variable "instance_shape_config_ocpus" {
   type      = number
   sensitive = false
-  default   = 2
+  default   = 1
 }
 
 variable "instance_source_details_boot_volume_size_in_gbs" {

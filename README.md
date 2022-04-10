@@ -201,6 +201,15 @@ Here we will create the `terraform/terraform.tfvars` file and explain how to obt
     tz                           = "America/New_York"
     pihole_webpassword           = "<generate a strong password. Avoid these characters: '=' and ';'>"
     pihole_dns_ip                = "1.1.1.1"
+    
+    # Base/Shared resources (OPTIONAL)
+    oci_vcn_id              = "<ID of an already existing VCN in case you want to use it; otherwise, a new one will be created>"
+    oci_internet_gateway_id = "<ID of an already existing internet gateway in case you want to use it; otherwise, a new one will be created>"
+    oci_route_table_id      = "<ID of an already existing route table in case you want to use it; otherwise, a new one will be created>"
+    oci_security_list_id    = "<ID of an already existing security list in case you want to use it; otherwise, a new one will be created>"
+    oci_subnet_id           = "<ID of an already existing subnet in case you want to use it; otherwise, a new one will be created>"
+    oci_image_id            = "<ID of an already existing image in case you want to use it; otherwise, a new one will be created>"
+
     ```
 
     Parameters:
