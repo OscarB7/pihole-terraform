@@ -4,26 +4,42 @@ data "oci_identity_availability_domains" "availability_domains" {
 
 
 resource "oci_core_vcn" "pihole_vcn" {
+  count = var.oci_vcn_id == null ? 1 : 0
+
   compartment_id = var.oci_tenancy_ocid
   cidr_blocks    = var.vcn_cidr_blocks
   display_name   = var.vcn_display_name
 }
 
 
+locals {
+  oci_vcn_id = var.oci_vcn_id == null ? oci_core_vcn.pihole_vcn[0].id : var.oci_vcn_id
+}
+
+
 resource "oci_core_internet_gateway" "pihole_internet_gateway" {
+  count = var.oci_internet_gateway_id == null ? 1 : 0
+
   compartment_id = var.oci_tenancy_ocid
-  vcn_id         = oci_core_vcn.pihole_vcn.id
+  vcn_id         = local.oci_vcn_id
   enabled        = true
   display_name   = var.internet_gateway_display_name
 }
 
 
+locals {
+  oci_internet_gateway_id = var.oci_internet_gateway_id == null ? oci_core_internet_gateway.pihole_internet_gateway[0].id : var.oci_internet_gateway_id
+}
+
+
 resource "oci_core_route_table" "pihole_route_table" {
+  count = var.oci_route_table_id == null ? 1 : 0
+
   compartment_id = var.oci_tenancy_ocid
-  vcn_id         = oci_core_vcn.pihole_vcn.id
+  vcn_id         = local.oci_vcn_id
   display_name   = var.route_table_display_name
   route_rules {
-    network_entity_id = oci_core_internet_gateway.pihole_internet_gateway.id
+    network_entity_id = local.oci_internet_gateway_id
     description       = "Internet access"
     destination       = "0.0.0.0/0"
     destination_type  = "CIDR_BLOCK"
@@ -31,9 +47,16 @@ resource "oci_core_route_table" "pihole_route_table" {
 }
 
 
+locals {
+  oci_route_table_id = var.oci_route_table_id == null ? oci_core_route_table.pihole_route_table[0].id : var.oci_route_table_id
+}
+
+
 resource "oci_core_security_list" "pihole_security_list" {
+  count = var.oci_security_list_id == null ? 1 : 0
+
   compartment_id = var.oci_tenancy_ocid
-  vcn_id         = oci_core_vcn.pihole_vcn.id
+  vcn_id         = local.oci_vcn_id
   display_name   = var.security_list_display_name
   egress_security_rules {
     destination = "0.0.0.0/0"
@@ -94,14 +117,26 @@ resource "oci_core_security_list" "pihole_security_list" {
 }
 
 
+locals {
+  oci_security_list_id = var.oci_security_list_id == null ? oci_core_security_list.pihole_security_list[0].id : var.oci_security_list_id
+}
+
+
 resource "oci_core_subnet" "public_subnet" {
+  count = var.oci_subnet_id == null ? 1 : 0
+
   cidr_block          = var.subnet_cidr_block
   compartment_id      = var.oci_tenancy_ocid
-  vcn_id              = oci_core_vcn.pihole_vcn.id
+  vcn_id              = local.oci_vcn_id
   availability_domain = data.oci_identity_availability_domains.availability_domains.availability_domains[0]["name"]
   display_name        = var.subnet_display_name
-  route_table_id      = oci_core_route_table.pihole_route_table.id
-  security_list_ids   = [oci_core_security_list.pihole_security_list.id]
+  route_table_id      = local.oci_route_table_id
+  security_list_ids   = [local.oci_security_list_id]
+}
+
+
+locals {
+  oci_subnet_id = var.oci_subnet_id == null ? oci_core_subnet.public_subnet[0].id : var.oci_subnet_id
 }
 
 
@@ -120,12 +155,17 @@ data "oci_core_images" "ubuntu_image" {
 }
 
 
+locals {
+  oci_image_id = var.oci_image_id == null ? data.oci_core_images.ubuntu_image.images.0.id : var.oci_image_id
+}
+
+
 resource "oci_core_instance" "pihole_wireguard" {
   availability_domain = data.oci_identity_availability_domains.availability_domains.availability_domains[0]["name"]
   compartment_id      = var.oci_tenancy_ocid
   shape               = var.instance_shape
   create_vnic_details {
-    subnet_id        = oci_core_subnet.public_subnet.id
+    subnet_id = local.oci_subnet_id
   }
   display_name = var.instance_display_name
   metadata = {
@@ -157,7 +197,7 @@ resource "oci_core_instance" "pihole_wireguard" {
     ocpus                     = var.instance_shape_config_ocpus
   }
   source_details {
-    source_id               = data.oci_core_images.ubuntu_image.images.0.id
+    source_id               = local.oci_image_id
     source_type             = "image"
     boot_volume_size_in_gbs = var.instance_source_details_boot_volume_size_in_gbs
   }
