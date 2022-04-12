@@ -140,10 +140,6 @@ locals {
 }
 
 
-# TODO: create a key to encrypt boot volume. kmsKeyId
-# TODO: create elastic IP for OCI and use it for this instance
-
-
 data "oci_core_images" "ubuntu_image" {
   compartment_id           = var.oci_tenancy_ocid
   operating_system         = "Canonical Ubuntu"
@@ -165,6 +161,7 @@ resource "oci_core_instance" "pihole_wireguard" {
   compartment_id      = var.oci_tenancy_ocid
   shape               = var.instance_shape
   create_vnic_details {
+    assign_public_ip = false
     subnet_id = local.oci_subnet_id
   }
   display_name = var.instance_display_name
@@ -202,4 +199,18 @@ resource "oci_core_instance" "pihole_wireguard" {
     boot_volume_size_in_gbs = var.instance_source_details_boot_volume_size_in_gbs
   }
   preserve_boot_volume = false
+}
+
+
+data "oci_core_private_ips" "pihole_wireguard" {
+  ip_address = oci_core_instance.pihole_wireguard.private_ip
+  subnet_id  = local.oci_subnet_id
+}
+
+
+resource "oci_core_public_ip" "pihole_wireguard_vnic" {
+  compartment_id = var.oci_tenancy_ocid
+  display_name   = var.reserved_public_ip
+  lifetime       = "RESERVED"
+  private_ip_id  = data.oci_core_private_ips.pihole_wireguard.private_ips[0]["id"]
 }
