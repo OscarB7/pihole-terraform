@@ -444,11 +444,11 @@ Password: 6V5!B6J!2FxM*$PJ#KP*aEN^%
 
 - Save Pi-hole configuration in an object-storage service, like S3, to recover the settings if the instance has issues or needs maintenance. The server should access the object storage privately with a service gateway.
 - Run instance in an autoscaling group to recover from some problem with the hardware.
-- Use a static public IP.
 - Add more than one client to the WireGuard server.
 - Add budget or spending limit for OCI in case of unexpected charges.
 - Run process in the containers as non-root.
 - Add Cloudflare container for Pi-hole to use DNS over HTTPS.
+- Create a key to encrypt boot volume. kmsKeyId
 
 See the [open issues](https://github.com/OscarB7/pihole-terraform/issues) for a complete list of proposed features (and known issues).
 

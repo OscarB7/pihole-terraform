@@ -45,3 +45,7 @@ output "port_pihole_web" {
 output "instance_public_ip" {
   value = oci_core_instance.pihole_wireguard.public_ip
 }
+
+output "reserved_public_ip" {
+  value = oci_core_public_ip.pihole_wireguard_vnic.ip_address
+}
