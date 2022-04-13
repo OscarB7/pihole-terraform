@@ -34,6 +34,10 @@ output "image_id" {
   value = data.oci_core_images.ubuntu_image.images.0.id
 }
 
+output "instance_public_ip" {
+  value = oci_core_instance.new_instance.public_ip
+}
+
 output "port_pihole_dns" {
   value = var.port_pihole_dns
 }
@@ -42,10 +46,6 @@ output "port_pihole_web" {
   value = var.port_pihole_web
 }
 
-output "instance_public_ip" {
-  value = oci_core_instance.pihole_wireguard.public_ip
-}
-
 output "reserved_public_ip" {
-  value = oci_core_public_ip.pihole_wireguard_vnic.ip_address
+  value = oci_core_public_ip.new_public_ip.ip_address
 }

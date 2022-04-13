@@ -3,7 +3,7 @@ data "oci_identity_availability_domains" "availability_domains" {
 }
 
 
-resource "oci_core_vcn" "pihole_vcn" {
+resource "oci_core_vcn" "new_vcn" {
   count = var.oci_vcn_id == null ? 1 : 0
 
   compartment_id = var.oci_tenancy_ocid
@@ -13,11 +13,11 @@ resource "oci_core_vcn" "pihole_vcn" {
 
 
 locals {
-  oci_vcn_id = var.oci_vcn_id == null ? oci_core_vcn.pihole_vcn[0].id : var.oci_vcn_id
+  oci_vcn_id = var.oci_vcn_id == null ? oci_core_vcn.new_vcn[0].id : var.oci_vcn_id
 }
 
 
-resource "oci_core_internet_gateway" "pihole_internet_gateway" {
+resource "oci_core_internet_gateway" "new_internet_gateway" {
   count = var.oci_internet_gateway_id == null ? 1 : 0
 
   compartment_id = var.oci_tenancy_ocid
@@ -28,11 +28,11 @@ resource "oci_core_internet_gateway" "pihole_internet_gateway" {
 
 
 locals {
-  oci_internet_gateway_id = var.oci_internet_gateway_id == null ? oci_core_internet_gateway.pihole_internet_gateway[0].id : var.oci_internet_gateway_id
+  oci_internet_gateway_id = var.oci_internet_gateway_id == null ? oci_core_internet_gateway.new_internet_gateway[0].id : var.oci_internet_gateway_id
 }
 
 
-resource "oci_core_route_table" "pihole_route_table" {
+resource "oci_core_route_table" "new_route_table" {
   count = var.oci_route_table_id == null ? 1 : 0
 
   compartment_id = var.oci_tenancy_ocid
@@ -48,11 +48,11 @@ resource "oci_core_route_table" "pihole_route_table" {
 
 
 locals {
-  oci_route_table_id = var.oci_route_table_id == null ? oci_core_route_table.pihole_route_table[0].id : var.oci_route_table_id
+  oci_route_table_id = var.oci_route_table_id == null ? oci_core_route_table.new_route_table[0].id : var.oci_route_table_id
 }
 
 
-resource "oci_core_security_list" "pihole_security_list" {
+resource "oci_core_security_list" "new_security_list" {
   count = var.oci_security_list_id == null ? 1 : 0
 
   compartment_id = var.oci_tenancy_ocid
@@ -118,11 +118,11 @@ resource "oci_core_security_list" "pihole_security_list" {
 
 
 locals {
-  oci_security_list_id = var.oci_security_list_id == null ? oci_core_security_list.pihole_security_list[0].id : var.oci_security_list_id
+  oci_security_list_id = var.oci_security_list_id == null ? oci_core_security_list.new_security_list[0].id : var.oci_security_list_id
 }
 
 
-resource "oci_core_subnet" "public_subnet" {
+resource "oci_core_subnet" "new_public_subnet" {
   count = var.oci_subnet_id == null ? 1 : 0
 
   cidr_block          = var.subnet_cidr_block
@@ -136,7 +136,7 @@ resource "oci_core_subnet" "public_subnet" {
 
 
 locals {
-  oci_subnet_id = var.oci_subnet_id == null ? oci_core_subnet.public_subnet[0].id : var.oci_subnet_id
+  oci_subnet_id = var.oci_subnet_id == null ? oci_core_subnet.new_public_subnet[0].id : var.oci_subnet_id
 }
 
 
@@ -156,13 +156,13 @@ locals {
 }
 
 
-resource "oci_core_instance" "pihole_wireguard" {
+resource "oci_core_instance" "new_instance" {
   availability_domain = data.oci_identity_availability_domains.availability_domains.availability_domains[0]["name"]
   compartment_id      = var.oci_tenancy_ocid
   shape               = var.instance_shape
   create_vnic_details {
     assign_public_ip = false
-    subnet_id = local.oci_subnet_id
+    subnet_id        = local.oci_subnet_id
   }
   display_name = var.instance_display_name
   metadata = {
@@ -202,15 +202,15 @@ resource "oci_core_instance" "pihole_wireguard" {
 }
 
 
-data "oci_core_private_ips" "pihole_wireguard" {
-  ip_address = oci_core_instance.pihole_wireguard.private_ip
+data "oci_core_private_ips" "new_instance_private_ips" {
+  ip_address = oci_core_instance.new_instance.private_ip
   subnet_id  = local.oci_subnet_id
 }
 
 
-resource "oci_core_public_ip" "pihole_wireguard_vnic" {
+resource "oci_core_public_ip" "new_public_ip" {
   compartment_id = var.oci_tenancy_ocid
   display_name   = var.reserved_public_ip
   lifetime       = "RESERVED"
-  private_ip_id  = data.oci_core_private_ips.pihole_wireguard.private_ips[0]["id"]
+  private_ip_id  = data.oci_core_private_ips.new_instance_private_ips.private_ips[0]["id"]
 }
