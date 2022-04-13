@@ -78,7 +78,7 @@ variable "vcn_cidr_blocks" {
 variable "vcn_display_name" {
   type      = string
   sensitive = false
-  default   = "pihole-wireguard-vns"
+  default   = "pihole-wireguard-vcn"
 }
 
 # Network
@@ -128,7 +128,7 @@ variable "subnet_cidr_block" {
 variable "subnet_display_name" {
   type      = string
   sensitive = false
-  default   = "pihole-wireguard-vns"
+  default   = "pihole-wireguard-subnet"
 }
 
 variable "your_home_public_ip" {
