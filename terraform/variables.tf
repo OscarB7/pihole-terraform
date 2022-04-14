@@ -142,6 +142,12 @@ variable "reserved_public_ip" {
   default   = "pihole-wireguard-public-ip"
 }
 
+variable "use_reserved_public_ip" {
+  type      = string
+  sensitive = false
+  default   = false
+}
+
 # Instance
 
 variable "instance_shape" {

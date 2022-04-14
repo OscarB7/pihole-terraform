@@ -47,5 +47,5 @@ output "port_pihole_web" {
 }
 
 output "reserved_public_ip" {
-  value = oci_core_public_ip.new_public_ip.ip_address
+  value = local.oci_reserved_public_ip
 }
