@@ -161,7 +161,7 @@ resource "oci_core_instance" "new_instance" {
   compartment_id      = var.oci_tenancy_ocid
   shape               = var.instance_shape
   create_vnic_details {
-    assign_public_ip = false
+    assign_public_ip = !var.use_reserved_public_ip
     subnet_id        = local.oci_subnet_id
   }
   display_name = var.instance_display_name
@@ -209,8 +209,18 @@ data "oci_core_private_ips" "new_instance_private_ips" {
 
 
 resource "oci_core_public_ip" "new_public_ip" {
+  count = var.use_reserved_public_ip ? 1 : 0
+
   compartment_id = var.oci_tenancy_ocid
   display_name   = var.reserved_public_ip
   lifetime       = "RESERVED"
   private_ip_id  = data.oci_core_private_ips.new_instance_private_ips.private_ips[0]["id"]
+  lifecycle {
+    prevent_destroy = true
+  }
+}
+
+
+locals {
+  oci_reserved_public_ip = var.use_reserved_public_ip ? oci_core_public_ip.new_public_ip[0].ip_address : ""
 }

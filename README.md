@@ -201,6 +201,7 @@ Here we will create the `terraform/terraform.tfvars` file and explain how to obt
     tz                           = "America/New_York"
     pihole_webpassword           = "<generate a strong password. Avoid these characters: '=' and ';'>"
     pihole_dns_ip                = "1.1.1.1"
+    use_reserved_public_ip       = true
     
     # Base/Shared resources (OPTIONAL)
     oci_vcn_id              = "<ID of an already existing VCN in case you want to use it; otherwise, a new one will be created>"
@@ -209,7 +210,6 @@ Here we will create the `terraform/terraform.tfvars` file and explain how to obt
     oci_security_list_id    = "<ID of an already existing security list in case you want to use it; otherwise, a new one will be created>"
     oci_subnet_id           = "<ID of an already existing subnet in case you want to use it; otherwise, a new one will be created>"
     oci_image_id            = "<ID of an already existing image in case you want to use it; otherwise, a new one will be created>"
-
     ```
 
     Parameters:
@@ -270,6 +270,10 @@ Here we will create the `terraform/terraform.tfvars` file and explain how to obt
         DNS server sed by Pi-hole.
         You can set more than one by separating DNS servers with `,` and leaving no spaces around it.
         You can specify the port of the DNS service by adding `#<port>` after the IP, e.g., `10.7.107.111#5053;1.1.1.1`
+    - **use_reserved_public_ip**: [*Default:* `false`]  
+        Create an reseved public IP, which is independent resource from the instance.  
+        If set to `true`, this IP will be attached to instance; therefore, if the instance is recreated, the public IP will not change.  
+        If set to `false`, the public IP will be created with the instance.
 
     &nbsp;  
     The default values will work fine unless the IP ranges overlap with your existing network.
@@ -288,6 +292,7 @@ Here we will create the `terraform/terraform.tfvars` file and explain how to obt
     wg_server_private_key  = "0GYGZzW1tIxNGattbKmBA6Y9WV/nc/kod6OP245qiF8="
     wg_client_public_key   = "e2C16gOS/M4C6+o6X7HFwnW6jWT2XlgMf39HaMvMhDo="
     pihole_webpassword     = "6V5!B6J!2FxM*$PJ#KP*aEN^%"
+    use_reserved_public_ip = true
     ```
 
 ### Installation
