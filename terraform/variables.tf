@@ -197,7 +197,7 @@ variable "ssh_public_key" {
 variable "docker_compose_version" {
   type      = string
   sensitive = false
-  default   = "2.1.1"
+  default   = ""
 }
 
 variable "docker_network_range" {
