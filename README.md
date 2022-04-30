@@ -48,75 +48,27 @@ The goal will be to run an OCI instance with two containers, Pi-hole and WireGua
 
 ### Prerequisites
 
-You will need the following:
-
-- Install [Docker Engine](https://docs.docker.com/engine/install/) in your machine/desktop/laptop/PC/workstation.
-- Install [Git](https://git-scm.com/downloads) in your machine/desktop/laptop/PC/workstation.
-- Understand `<foo>` is a placeholder, and you must delete from `<` to `>` and write the correct value of `foo` when needed, e.g.:
-    - if `for=bar`; then `<for>` &rarr; `bar`
-    - `"<'region' of the OCI account>"` &rarr; `"us-ashburn-1"`
-    - `<DNS IP>` &rarr; `1.1.1.1`
-- Know how to open the terminal in your machine and run commands.
+The prerequisites are listed [here](https://github.com/OscarB7/terraform-oci-base-resources#prerequisites).
 
 
 ### Setup
 
 Here we will create the `terraform/terraform.tfvars` file and explain how to obtain all the needed values.
 
-*It is important you do not share these parameters and files for recurity reasons.*
+*It is important you do not share these parameters and files for security reasons.*
 &nbsp;  
 
-1. Create an OCI account. Follow this [link](https://signup.cloud.oracle.com/?sourceType=_ref_coc-asset-opcSignIn&language=en_US) to sign up.
+1. OCI authentication.
 
-2. Create an API KEY in Oracle.
+    Follow these [instructions](https://github.com/OscarB7/terraform-oci-base-resources#setup) to get the value of the variables `oci_region`, `oci_user_ocid`, `oci_tenancy_ocid`, `oci_fingerprint`, `oci_private_key_base64`, and `your_home_public_ip`.
 
-    i. Log in to **OCI** > click on the profile icon (in the upper-right corner) and select your user.
-        <kbd>![Select OCI profile](https://i.imgur.com/gI45oCg.jpg)</kbd>
-        &nbsp;  
-
-    ii. Go to **API Keys** at the end of the page and create a new one.
-        <kbd>![Add keys](https://i.imgur.com/R1Wu89c.jpeg)</kbd>
-        &nbsp;  
-
-    iii. Select **Generate API Key Pair** and download the private key.
-        <kbd>![Download kwys](https://i.imgur.com/iNIZ7eV.jpeg)</kbd>
-        &nbsp;  
-
-    iv. Copy the **Configuration File** for later.
-        <kbd>![Copy profile configuration](https://i.imgur.com/1pk4zPM.jpeg)</kbd>
-        &nbsp;  
-
-3. Convert the private key downloaded in step 2.iii to a **one-line** base64 string.
-
-    i. If you have a Linux terminal, you may use this approach. Make sure the output is one line; otherwise, remove the new lines manually (leave no spaces) or use the second method.
-
-        ```shell
-        base64 <path to the private key file>
-        # save this output for later
-        ```
-
-    ii. Launch a Docker container to convert the file into a base64 string (run lines one by one):
-
-        ```shell
-        docker run --rm -it --name temp ubuntu:latest bash
-
-        # open and run in a new terminal
-        docker container cp <path to the private key file> temp:/tmp/private-key.pem
-        exit
-
-        # back to the first terminal
-        base64 /tmp/private-key.pem -w 0; echo
-        # save this output for later
-        exit
-        ```
-
-4. Clone this project to your machine.
+2. Clone this project to your machine.
 
     ```shell
     git clone https://github.com/OscarB7/pihole-terraform.git
     ```
 
-5. Create WireGuard key pairs.
+3. Create WireGuard key pairs.
 
     Here you will build our WireGuard container, generate two WireGuard key pairs (`server.privatekey`, `server.publickey`, `client.privatekey`, and `client.publickey`), and copy those files to your machine.
 
@@ -145,9 +97,10 @@ Here we will create the `terraform/terraform.tfvars` file and explain how to obt
     docker rm -f temp
     ```
 
-6. Create SSH keys.
+4. Create SSH keys.
 
-    You need these to SSH to the server. Here you will launch an Ubuntu container, install OpenSSH, generate a SSH key pair (`id_rsa` and `id_rsa.pub`), and copy those files to your machine (run lines one by one).
+    You need these to SSH to the server.  
+    You probably can run this commands in your own machine. Here, for the sake of simplicity, you will launch an Ubuntu container, install OpenSSH, generate a SSH key pair (`id_rsa` and `id_rsa.pub`), and copy those files to your machine (run lines one by one).
 
     ```shell
     # run the container and access it
@@ -169,14 +122,14 @@ Here we will create the `terraform/terraform.tfvars` file and explain how to obt
     docker rm -f temp
     ```
 
-7. Get your home public IP address.
+5. Get your home public IP address.
 
     Connect to your WiFi at home, go to [this](https://ifconfig.co/ip) page, and copy the IP value.
 
     This location/network will be allowed to access (1) the Pi-hole DNS service directly without WireGuard connection, (2) the Pi-hole web console, and (3) the OCI instance via SSH.
     &nbsp;  
 
-8. Create the `terraform/terraform.tfvars` file.
+6. Create the `terraform/terraform.tfvars` file.
 
     ```shell
     oci_region                   = "<'region' field of the Configuration File in step 2.iv>"
@@ -184,8 +137,9 @@ Here we will create the `terraform/terraform.tfvars` file and explain how to obt
     oci_tenancy_ocid             = "<'tenancy' field of the Configuration File in step 2.iv>"
     oci_fingerprint              = "<'fingerprint' field of the Configuration File in step 2.iv>"
     oci_private_key_base64       = "<base64 one-line string obained in step 3>"
-    your_home_public_ip          = "<public IP address of your home obtained in step 7>"
-    ssh_public_key               = "<the content of the file 'id_rsa.pub' created in step 6>"
+    your_home_public_ip          = "<public IP address of your home obtained in step 5>"
+    ssh_public_key               = "<the content of the file 'id_rsa.pub' created in step 4>"
+    use_reserved_public_ip       = true
     docker_compose_version       = "2.1.1"
     docker_network_range         = "10.7.0.0/16"
     docker_compose_network_range = "10.7.107.0/24"
@@ -193,15 +147,14 @@ Here we will create the `terraform/terraform.tfvars` file and explain how to obt
     pihole_dns_port              = "53"
     pihole_web_port              = "80"
     wg_port                      = "51820"
-    wg_server_private_key        = "<the content of the file 'server.privatekey' created in step 5>"
+    wg_server_private_key        = "<the content of the file 'server.privatekey' created in step 3>"
     wg_server_ip                 = "10.6.0.1/24"
     wg_server_port               = "51820"
-    wg_client_public_key         = "<the content of the file 'client.publickey' created in step 5>"
+    wg_client_public_key         = "<the content of the file 'client.publickey' created in step 3>"
     wg_client_ip                 = "10.6.0.2/32"
     tz                           = "America/New_York"
     pihole_webpassword           = "<generate a strong password. Avoid these characters: '=' and ';'>"
     pihole_dns_ip                = "1.1.1.1"
-    use_reserved_public_ip       = true
     
     # Base/Shared resources (OPTIONAL)
     oci_vcn_id              = "<ID of an already existing VCN in case you want to use it; otherwise, a new one will be created>"
@@ -234,7 +187,11 @@ Here we will create the `terraform/terraform.tfvars` file and explain how to obt
         This value comes from step 6.
     - **ssh_public_key**: [*REQUIRED*]  
         SSH public key.  
-        This value comes from the content of the `id_rsa.pub` file created in step 5.
+        This value comes from the content of the `id_rsa.pub` file created in step 3.
+    - **use_reserved_public_ip**: [*Default:* `false`]  
+        Create a reserved public IP, which is an independent resource from the instance.  
+        If set to `true`, this IP will be attached to the instance; therefore, if the instance is recreated, the public IP will not change.  
+        If set to `false`, the public IP will be created with the instance.
     - **docker_compose_version**: [*Default:* `2.1.1`]  
         Docker Compose version to be installed in the OCI instance.
     - **docker_network_range**: [*Default:* `10.7.0.0/16`]  
@@ -270,92 +227,64 @@ Here we will create the `terraform/terraform.tfvars` file and explain how to obt
         DNS server sed by Pi-hole.
         You can set more than one by separating DNS servers with `,` and leaving no spaces around it.
         You can specify the port of the DNS service by adding `#<port>` after the IP, e.g., `10.7.107.111#5053;1.1.1.1`
-    - **use_reserved_public_ip**: [*Default:* `false`]  
-        Create an reseved public IP, which is independent resource from the instance.  
-        If set to `true`, this IP will be attached to instance; therefore, if the instance is recreated, the public IP will not change.  
-        If set to `false`, the public IP will be created with the instance.
 
     &nbsp;  
     The default values will work fine unless the IP ranges overlap with your existing network.
     &nbsp;  
 
+    &nbsp;  
     Example (**do not use these values**):
 
     ```shell
+    # from step 1
     oci_region             = "us-ashburn-1"
     oci_user_ocid          = "ocid1.user.oc1..aaa...wmpxt"
     oci_tenancy_ocid       = "ocid1.tenancy.oc1..aaa...dnkxd"
     oci_fingerprint        = "17:a8:...:01:c4"
     oci_private_key_base64 = "AS0tZS2CR3dJT4BQUkl...ZAS3tLS4="
     your_home_public_ip    = "123.123.123.123/32"
+
     ssh_public_key         = "ssh-rsa AAAAB3NzaC1...Elzyar4w== root@c14cb235dae5"
+    use_reserved_public_ip = true
+
     wg_server_private_key  = "0GYGZzW1tIxNGattbKmBA6Y9WV/nc/kod6OP245qiF8="
     wg_client_public_key   = "e2C16gOS/M4C6+o6X7HFwnW6jWT2XlgMf39HaMvMhDo="
     pihole_webpassword     = "6V5!B6J!2FxM*$PJ#KP*aEN^%"
-    use_reserved_public_ip = true
+
+    # Base/Shared resources (OPTIONAL)
+    # in case you created the base resources already with the project terraform-oci-base-resources,
+    # see the local_variables from output, e.g., local_oci_vcn_id
+    oci_vcn_id              = "ocid1.vcn.oc1.iad.am...wa"
+    oci_internet_gateway_id = "ocid1.internetgateway.oc1.iad.aa...ea"
+    oci_route_table_id      = "ocid1.routetable.oc1.iad.aa...xq"
+    oci_security_list_id    = "ocid1.securitylist.oc1.iad.aa...da"
+    oci_subnet_id           = "ocid1.subnet.oc1.iad.aa...pq"
     ```
 
 ### Installation
 
-Now that you have completed the [prerequisites](#prerequisites) and [setup](#setup), you can deploy the project to OCI with Terraform.
+Now that you have completed the [setup](#setup), you can deploy the project to OCI with Terraform.
 
-#### Local Terraform
+Follow these [instructions](https://github.com/OscarB7/terraform-oci-base-resources#installation) to create the resources in OCI with Nefertiti running in an instance.
 
-Run the following commands one by one from the root folder of this project.
-
-```shell
-docker run --rm -it --name tf --mount type=bind,source="$(pwd)"/terraform,target=/tf --entrypoint sh hashicorp/terraform:1.1.4
-cd /tf
-terraform init
-terraform apply
-# read the output from terraform and respond 'yes' to confirm you want to create the resources
-exit
-```
-
-After finishing the deployment, you can read the public IP of the OCI instance from `instance_public_ip` and the Pi-hole DNS and web console ports, `port_pihole_dns` and `port_pihole_web` (we will refer to this information later). Here is an example of the output:
+After applying the project, you will see the public IP of your instance in the variable `instance_public_ip` and the Pi-hole DNS and web console ports, `port_pihole_dns` and `port_pihole_web` (we will refer to this information later) in the Terraform output. For example:
 
 ```shell
 ...
-Apply complete! Resources: 6 added, 0 changed, 0 destroyed.
+Apply complete! Resources: ...
 
 Outputs:
-
-availability_domains = "TSJZ:US-ASHBURN-AD-1"
-image_id = "ocid1.image.oc1.iad.aaaaaaaa2tex34yxzqunbwnfnat6pkh2ztqchvfyygnnrhfv7urpbhozdw2a"
-image_name = "Canonical-Ubuntu-20.04-aarch64-2021.12.01-0"
+...
 instance_public_ip = "157.157.157.157"
 port_pihole_dns = 53
 port_pihole_web = 80
-/tf # 
+...
 ```
 
-You will see new files created in the project directory, which have the current state of the infrastructure. Do not delete those files because you need them for [destroying the resources](#destroy-resources).
-
-#### Terraform Cloud
-
-Here you will use the free tier of [Terraform Cloud](https://cloud.hashicorp.com/products/terraform) as an alternative to the local solution. Why use this instead? Because it will keep track of the Terraform state for you; otherwise, you have to save those files if you want to update or destroy the deployment later. Check the previous link for a full explanation of the benefits.
-
-You can follow this [tutorial](https://learn.hashicorp.com/tutorials/terraform/cloud-sign-up?in=terraform/cloud-get-started), get familiar with it, and repeat the steps for this project.
 
 ### Destroy Resources
 
-You can destroy/remove the resources you created with Terraform at any moment. Note you should not edit those resources using the OCI console since it may interfere with this step.
-
-Below is the process if you deployed using [local Terraform](#local-terraform).
-
-```shell
-# in case the tf container is still running
-docker rm -f tf
-
-docker run --rm -it --name tf --mount type=bind,source="$(pwd)"/terraform,target=/tf --entrypoint sh hashicorp/terraform:1.1.4
-
-cd /tf
-terraform destroy
-# read the output from terraform and respond 'yes' to confirm you want to delete the resources
-exit
-```
-
-If you deployed this project using [Terraform Cloud](#terraform-cloud), the tutorial linked in that section explains how to destroy the resources.
+Follow these [instructions](https://github.com/OscarB7/terraform-oci-base-resources#destroy-resources) to destroy the resources created in the [installation](#installation) step.
 
 
 ## Usage
@@ -400,22 +329,21 @@ The value of AllowedIPs defines what traffic is sent through the VPN. Your devic
 
 ### SSH to the Server
 
-You can SSH to the server if you are curious or need to troubleshoot. Use the following credentials from your home.
-
+You can SSH to the server if you need to troubleshoot. Use the following credentials from your home.
 
 ```shell
 Hostname: <'instance_public_ip' from the 'installation' section>
 Username: ubuntu
-Private key: <use 'id_rsa', created in step 6 from the 'setup' section>
+Private key: <use 'id_rsa', created in 'setup' section>
 ```
 
 **Note** there is no `password` since it authenticates with a private key.
 
-You can use [Putty](https://www.putty.org/) on Windows or these commands on a Linux terminal:
+You can use [Putty](https://www.putty.org/) on Windows or these commands on a Linux terminal where you saved the `id_rsa` file:
 
 ```shell
 chmod 0600 id_rsa
-ssh ubuntu@<'instance_public_ip' from the 'installation' section> -i id_rsa
+ssh ubuntu@<'instance_public_ip'> -i id_rsa
 ```
 
 Example:
@@ -465,11 +393,11 @@ Contributions make the open-source community a great place to learn, inspire, an
 Please fork this repo and create a pull request if you have any suggestions. You can also open an issue with the tag `enhancement`.
 Don't forget to give the project a star! Thanks again!
 
-1. Fork the Project
-2. Create your Feature Branch (`git checkout -b feature/AmazingFeature`)
-3. Commit your Changes (`git commit -m 'Add some AmazingFeature'`)
-4. Push to the Branch (`git push origin feature/AmazingFeature`)
-5. Open a Pull Request
+1. Fork the project
+2. Create your feature branch (`git checkout -b feature/AmazingFeature`)
+3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
+4. Push to the branch (`git push origin feature/AmazingFeature`)
+5. Open a pull request
 
 
 ## License
