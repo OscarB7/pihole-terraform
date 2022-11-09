@@ -215,9 +215,6 @@ resource "oci_core_public_ip" "new_public_ip" {
   display_name   = var.reserved_public_ip
   lifetime       = "RESERVED"
   private_ip_id  = data.oci_core_private_ips.new_instance_private_ips.private_ips[0]["id"]
-  lifecycle {
-    prevent_destroy = true
-  }
 }
 
 
