@@ -46,6 +46,14 @@ output "port_pihole_web" {
   value = var.port_pihole_web
 }
 
+output "port_proxy_http" {
+  value = var.port_proxy_http
+}
+
+output "port_proxy_https" {
+  value = var.port_proxy_https
+}
+
 output "reserved_public_ip" {
   value = local.oci_reserved_public_ip
 }

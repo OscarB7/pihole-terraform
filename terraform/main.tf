@@ -114,6 +114,26 @@ resource "oci_core_security_list" "new_security_list" {
       min = var.port_pihole_web
     }
   }
+  ingress_security_rules {
+    protocol    = 6 # 6=TCP
+    source      = var.your_home_public_ip
+    description = "allow <nginx http Port>/TCP (Pihole web) inbound traffic from home"
+    stateless   = false
+    tcp_options {
+      max = var.port_proxy_http
+      min = var.port_proxy_http
+    }
+  }
+  ingress_security_rules {
+    protocol    = 6 # 6=TCP
+    source      = var.your_home_public_ip
+    description = "allow <nginx https Port>/TCP (Pihole web) inbound traffic from home"
+    stateless   = false
+    tcp_options {
+      max = var.port_proxy_https
+      min = var.port_proxy_https
+    }
+  }
 }
 
 

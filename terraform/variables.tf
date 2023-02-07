@@ -116,7 +116,19 @@ variable "port_pihole_dns" {
 variable "port_pihole_web" {
   type      = number
   sensitive = false
+  default   = 8080
+}
+
+variable "port_proxy_http" {
+  type      = number
+  sensitive = false
   default   = 80
+}
+
+variable "port_proxy_https" {
+  type      = number
+  sensitive = false
+  default   = 443
 }
 
 variable "subnet_cidr_block" {
@@ -227,7 +239,7 @@ variable "pihole_dns_port" {
 variable "pihole_web_port" {
   type      = string
   sensitive = false
-  default   = "80"
+  default   = "8080"
 }
 
 variable "wg_port" {

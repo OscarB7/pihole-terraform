@@ -10,6 +10,8 @@ docker-vol
 **/terraform.tfstate.backup
 **.tfvars
 **/*.pem
+**/*.crt
+proxy/certs
 **/server.privatekey
 **/server.publickey
 **/client.privatekey
