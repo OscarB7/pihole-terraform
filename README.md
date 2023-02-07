@@ -145,7 +145,7 @@ Here we will create the `terraform/terraform.tfvars` file and explain how to obt
     docker_compose_network_range = "10.7.107.0/24"
     pihole_ip                    = "10.7.107.101"
     pihole_dns_port              = "53"
-    pihole_web_port              = "80"
+    pihole_web_port              = "8080"
     wg_port                      = "51820"
     wg_server_private_key        = "<the content of the file 'server.privatekey' created in step 3>"
     wg_server_ip                 = "10.6.0.1/24"
@@ -202,7 +202,7 @@ Here we will create the `terraform/terraform.tfvars` file and explain how to obt
         Private IP of the Pi-hole container.
     - **pihole_dns_port**: [*Default:* `53`]  
         Published port for DNS service of Pi-hole.
-    - **pihole_web_port**: [*Default:* `80`]  
+    - **pihole_web_port**: [*Default:* `8080`]  
         Published port for web console of Pi-hole.
     - **wg_port**: [*Default:* `51820`]  
         Published port for WireGuard port to the instance.
@@ -267,7 +267,7 @@ Now that you have completed the [setup](#setup), you can deploy the project to O
 
 Follow these [instructions](https://github.com/OscarB7/terraform-oci-base-resources#installation) to create the resources in OCI with Nefertiti running in an instance.
 
-After applying the project, you will see the public IP of your instance in the variable `instance_public_ip` and the Pi-hole DNS and web console ports, `port_pihole_dns` and `port_pihole_web` (we will refer to this information later) in the Terraform output. For example:
+After applying the project, you will see the public IP of your instance in the variable `instance_public_ip` and the Pi-hole DNS and web console ports, `port_pihole_dns`, `port_pihole_web`, `port_proxy_http`, and `port_proxy_https` (we will refer to this information later) in the Terraform output. For example:
 
 ```shell
 ...
@@ -277,7 +277,7 @@ Outputs:
 ...
 instance_public_ip = "157.157.157.157"
 port_pihole_dns = 53
-port_pihole_web = 80
+port_pihole_web = 8080
 ...
 ```
 
@@ -358,16 +358,19 @@ ssh ubuntu@157.157.157.157 -i id_rsa
 Use these URLs to access the Pi-hole web console to manage it.
 
 ```shell
+URL from your home using HTTPS: http://<'instance_public_ip' from the 'installation' section>:<'port_proxy_https' from the 'installation' section>/admin
 URL from your home: http://<'instance_public_ip' from the 'installation' section>:<'port_pihole_web' from the 'installation' section>/admin
-URL when connected to WireGuard: http://<'pihole_ip' value from 'terraform/terraform.tfvars'>:80/admin
+URL when connected to WireGuard: http://<'pihole_ip' value from 'terraform/terraform.tfvars'>:8080/admin
 Password: <'pihole_webpassword' value from 'terraform/terraform.tfvars'>
 ```
 
 Example:
 
 ```shell
-URL from your home: http://157.157.157.157:80/admin
-URL connected to WireGuard: http://10.7.107.101:80/admin
+URL from your home: http://157.157.157.157
+URL from your home: https://157.157.157.157/admin
+URL from your home: http://157.157.157.157:8080/admin
+URL connected to WireGuard: http://10.7.107.101:8080/admin
 Password: 6V5!B6J!2FxM*$PJ#KP*aEN^%
 ```
 

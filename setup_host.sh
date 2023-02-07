@@ -35,13 +35,18 @@ chmod -v +x /usr/local/bin/docker-compose
 
 mkdir -vp ./docker-vol/{etc-pihole,etc-dnsmasq.d}
 
+# create self signed certificate
+mkdir -p proxy/certs
+openssl req -newkey rsa:2048 -x509 -nodes -sha256 -keyout proxy/certs/private-key.pem -out proxy/certs/public-key.crt -subj "/CN=home.local/O=Home/C=US"
+
 ## start services
 docker-compose up -d
 
 ## cron jobs to update server and containers
 cat << EOF > /tmp/update_jobs
-0 3 * * 6    export DEBIAN_FRONTEND=noninteractive && apt update &>/tmp/crontab.log && apt -o Dpkg::Options::="--force-confold" upgrade -q -y && apt -o Dpkg::Options::="--force-confold" dist-upgrade -q -y && apt autoremove -q -y
-0 4 * * 6    docker-compose pull pihole && docker-compose up --force-recreate --build -d &>/tmp/crontab.log && docker image prune -f
+0 3 * * 6    export DEBIAN_FRONTEND=noninteractive && apt update && apt -o Dpkg::Options::="--force-confold" upgrade -q -y && apt -o Dpkg::Options::="--force-confold" dist-upgrade -q -y && apt autoremove -q -y
+0 4 * * 6    cd /opt/pihole-terraform/ && docker-compose pull pihole && docker-compose up --force-recreate --build -d && docker image prune -f
 EOF
 
 cp /tmp/update_jobs /etc/cron.d/update_jobs
+cat /etc/cron.d/update_jobs | crontab -
