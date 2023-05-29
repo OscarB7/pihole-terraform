@@ -26,7 +26,7 @@ apt-get update
 apt-get install -y docker-ce docker-ce-cli containerd.io
 host_details="$(uname -s)-$(uname -m)"
 if [[ -z $DOCKER_COMPOSE_VERSION ]]; then
-    docker_compose_version=`curl https://github.com/docker/compose/releases/latest 2>1 | grep -o "v[0-9]*\.[0-9]\.[0-9]"`
+    docker_compose_version=`curl -s https://api.github.com/repos/docker/compose/releases/latest | grep 'tag_name' | cut -d\" -f4`
 else
     docker_compose_version="v$DOCKER_COMPOSE_VERSION"
 fi
