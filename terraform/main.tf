@@ -64,14 +64,17 @@ resource "oci_core_security_list" "new_security_list" {
     description = "allow all outbound traffic from the instance"
     stateless   = false
   }
-  ingress_security_rules {
-    protocol    = 6 # 6=TCP
-    source      = var.your_home_public_ip
-    description = "allow 22/TCP (SSH) inbound traffic from home"
-    stateless   = false
-    tcp_options {
-      max = 22
-      min = 22
+  dynamic "ingress_security_rules" {
+    for_each = var.your_home_public_ip
+    content {
+      protocol    = 6 # 6=TCP
+      source      = ingress_security_rules.value
+      description = "allow 22/TCP (SSH) inbound traffic from home"
+      stateless   = false
+      tcp_options {
+        max = 22
+        min = 22
+      }
     }
   }
   ingress_security_rules {
@@ -84,54 +87,69 @@ resource "oci_core_security_list" "new_security_list" {
       min = var.port_wireguard
     }
   }
-  ingress_security_rules {
-    protocol    = 6 # 6=TCP
-    source      = var.your_home_public_ip
-    description = "allow <Pihole DNS Port>/TCP (Pihole DNS) inbound traffic from home"
-    stateless   = false
-    tcp_options {
-      max = var.port_pihole_dns
-      min = var.port_pihole_dns
+  dynamic "ingress_security_rules" {
+    for_each = var.your_home_public_ip
+    content {
+      protocol    = 6 # 6=TCP
+      source      = ingress_security_rules.value
+      description = "allow <Pihole DNS Port>/TCP (Pihole DNS) inbound traffic from home"
+      stateless   = false
+      tcp_options {
+        max = var.port_pihole_dns
+        min = var.port_pihole_dns
+      }
     }
   }
-  ingress_security_rules {
-    protocol    = 17 # 17=UDP
-    source      = var.your_home_public_ip
-    description = "allow <Pihole DNS Port>/UDP (Pihole DNS) inbound traffic from home"
-    stateless   = false
-    udp_options {
-      max = var.port_pihole_dns
-      min = var.port_pihole_dns
+  dynamic "ingress_security_rules" {
+    for_each = var.your_home_public_ip
+    content {
+      protocol    = 17 # 17=UDP
+      source      = ingress_security_rules.value
+      description = "allow <Pihole DNS Port>/UDP (Pihole DNS) inbound traffic from home"
+      stateless   = false
+      udp_options {
+        max = var.port_pihole_dns
+        min = var.port_pihole_dns
+      }
     }
   }
-  ingress_security_rules {
-    protocol    = 6 # 6=TCP
-    source      = var.your_home_public_ip
-    description = "allow <Pihole web Port>/TCP (Pihole web) inbound traffic from home"
-    stateless   = false
-    tcp_options {
-      max = var.port_pihole_web
-      min = var.port_pihole_web
+  dynamic "ingress_security_rules" {
+    for_each = var.your_home_public_ip
+    content {
+      protocol    = 6 # 6=TCP
+      source      = ingress_security_rules.value
+      description = "allow <Pihole web Port>/TCP (Pihole web) inbound traffic from home"
+      stateless   = false
+      tcp_options {
+        max = var.port_pihole_web
+        min = var.port_pihole_web
+      }
     }
   }
-  ingress_security_rules {
-    protocol    = 6 # 6=TCP
-    source      = var.your_home_public_ip
-    description = "allow <nginx http Port>/TCP (Pihole web) inbound traffic from home"
-    stateless   = false
-    tcp_options {
-      max = var.port_proxy_http
-      min = var.port_proxy_http
+  dynamic "ingress_security_rules" {
+    for_each = var.your_home_public_ip
+    content {
+      protocol    = 6 # 6=TCP
+      source      = ingress_security_rules.value
+      description = "allow <nginx http Port>/TCP (Pihole web) inbound traffic from home"
+      stateless   = false
+      tcp_options {
+        max = var.port_proxy_http
+        min = var.port_proxy_http
+      }
     }
   }
-  ingress_security_rules {
-    protocol    = 6 # 6=TCP
-    source      = var.your_home_public_ip
-    description = "allow <nginx https Port>/TCP (Pihole web) inbound traffic from home"
-    stateless   = false
-    tcp_options {
-      max = var.port_proxy_https
-      min = var.port_proxy_https
+  dynamic "ingress_security_rules" {
+    for_each = var.your_home_public_ip
+    content {
+      protocol    = 6 # 6=TCP
+      source      = ingress_security_rules.value
+      description = "allow <nginx https Port>/TCP (Pihole web) inbound traffic from home"
+      stateless   = false
+      tcp_options {
+        max = var.port_proxy_https
+        min = var.port_proxy_https
+      }
     }
   }
 }
