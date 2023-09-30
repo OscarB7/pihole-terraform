@@ -74,7 +74,7 @@ Here we will create the `terraform/terraform.tfvars` file and explain how to obt
 
     **Note** WireGuard does not differentiate between `server` and `client`; instead, all devices are `peers`. This document will refer to the WireGuard peer installed in the OCI instance as the `WireGuard server` and `WireGuard client` to the one installed in your device, e.g., phone or laptop.
 
-    Run the following lines one by one to create the keys.
+    Run the following lines one by one to create the keys manually or see option below using the script.
 
     ```shell
     # build container
@@ -95,6 +95,26 @@ Here we will create the `terraform/terraform.tfvars` file and explain how to obt
     docker container cp temp:/etc/wireguard/client.publickey .
 
     docker rm -f temp
+    ```
+
+    You can use the `create_wg_keys.sh` script to create multiple WireGuard key pairs:
+
+    ```shell
+    # change file permission. needed if you get the following error:
+    #   exec: "/opt/tools/create_wg_keys.sh": permission denied: unknown.
+    chmod 0750 tools/create_wg_keys.sh
+
+    # build WireGuard container
+    docker build --tag wg:latest .
+
+    # create keys with the following command
+    # docker run --rm -it --name temp -v ./tools/create_wg_keys.sh:/opt/tools/create_wg_keys.sh wg:latest /opt/tools/create_wg_keys.sh <number of clients> <IP of first client>
+    # change <number of clients> with the number of clients you will need
+    # change <IP of first client> with the address you prefer or leave it empty to use the default value
+    # example:
+    docker run --rm -it --name temp -v ./tools/create_wg_keys.sh:/opt/tools/create_wg_keys.sh wg:latest /opt/tools/create_wg_keys.sh 2 10.6.0.2/32
+
+    # copy the line below "base64 string with all keys" from the script output
     ```
 
 4. Create SSH keys.
@@ -136,7 +156,7 @@ Here we will create the `terraform/terraform.tfvars` file and explain how to obt
     oci_user_ocid                = "<'user' field of the Configuration File in step 2.iv>"
     oci_tenancy_ocid             = "<'tenancy' field of the Configuration File in step 2.iv>"
     oci_fingerprint              = "<'fingerprint' field of the Configuration File in step 2.iv>"
-    oci_private_key_base64       = "<base64 one-line string obained in step 3>"
+    oci_private_key_base64       = "<base64 one-line string obained in step 1>"
     your_home_public_ip          = "<public IP address of your home obtained in step 5>"
     ssh_public_key               = "<the content of the file 'id_rsa.pub' created in step 4>"
     use_reserved_public_ip       = true
@@ -147,6 +167,7 @@ Here we will create the `terraform/terraform.tfvars` file and explain how to obt
     pihole_dns_port              = "53"
     pihole_web_port              = "8080"
     wg_port                      = "51820"
+    wg_keys_base64               = "<base64 one-line string obained in step 1>"
     wg_server_private_key        = "<the content of the file 'server.privatekey' created in step 3>"
     wg_server_ip                 = "10.6.0.1/24"
     wg_server_port               = "51820"
@@ -181,13 +202,13 @@ Here we will create the `terraform/terraform.tfvars` file and explain how to obt
         `region` parameter from the Configuration File in step 2.iv.
     - **oci_private_key_base64**: [*REQUIRED*]  
         One-line base64 string of the OCI private key downloaded in step 2.iii.  
-        This value comes from step 3.
+        This value comes from step 1.
     - **your_home_public_ip**: [*REQUIRED*]  
         Public IP of your home.  
         This value comes from step 6.
     - **ssh_public_key**: [*REQUIRED*]  
         SSH public key.  
-        This value comes from the content of the `id_rsa.pub` file created in step 3.
+        This value comes from the content of the `id_rsa.pub` file created in step 4.
     - **use_reserved_public_ip**: [*Default:* `false`]  
         Create a reserved public IP, which is an independent resource from the instance.  
         If set to `true`, this IP will be attached to the instance; therefore, if the instance is recreated, the public IP will not change.  
@@ -206,6 +227,9 @@ Here we will create the `terraform/terraform.tfvars` file and explain how to obt
         Published port for web console of Pi-hole.
     - **wg_port**: [*Default:* `51820`]  
         Published port for WireGuard port to the instance.
+    - **wg_keys_base64**: [*Default:* `Null`]  
+        Base64 string with the WireGuard keys of the server and clients needed to configure the server.  
+        This value comes from step 3.
     - **wg_server_private_key**: [*REQUIRED*]  
         The private key of the WireGuard server in OCI.  
         This value comes from the content of the `server.privatekey` file created in step 4.
@@ -213,7 +237,7 @@ Here we will create the `terraform/terraform.tfvars` file and explain how to obt
         IP of the WireGuard private network and mask.
     - **wg_server_port**: [*Default:* `51820`]  
         WireGuard port inside the container.
-    - **wg_client_public_key**: [*REQUIRED*]  
+    - **wg_client_public_key**: [*REQUIRED, unless wg_keys_base64 is passed*]  
         The public key of the WireGuard client.  
         This value comes from the content of the `client.publickey` file created in step 4.
     - **wg_client_ip**: [*Default:* `10.6.0.2/32`]  

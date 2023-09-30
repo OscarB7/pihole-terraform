@@ -215,6 +215,7 @@ resource "oci_core_instance" "new_instance" {
         pihole_dns_port              = var.pihole_dns_port,
         pihole_web_port              = var.pihole_web_port,
         wg_port                      = var.wg_port,
+        wg_keys_base64               = var.wg_keys_base64,
         wg_server_private_key        = var.wg_server_private_key,
         wg_server_ip                 = var.wg_server_ip,
         wg_server_port               = var.wg_server_port,
