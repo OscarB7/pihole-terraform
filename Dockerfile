@@ -7,6 +7,7 @@ RUN \
     apk add wireguard-tools
 
 ENV \
+    WG_KEYS_BASE64='' \
     WG_SERVER_PRIVATE_KEY='' \
     WG_SERVER_IP='10.6.0.1/24' \
     WG_SERVER_PORT='51820' \

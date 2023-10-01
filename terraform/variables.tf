@@ -214,6 +214,11 @@ variable "wg_port" {
   default   = "51820"
 }
 
+variable "wg_keys_base64" {
+  type      = string
+  sensitive = true
+}
+
 variable "wg_server_private_key" {
   type      = string
   sensitive = true
