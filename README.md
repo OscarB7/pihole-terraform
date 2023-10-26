@@ -107,14 +107,16 @@ Here we will create the `terraform/terraform.tfvars` file and explain how to obt
     # build WireGuard container
     docker build --tag wg:latest .
 
-    # create keys with the following command
-    # docker run --rm -it --name temp -v ./tools/create_wg_keys.sh:/opt/tools/create_wg_keys.sh wg:latest /opt/tools/create_wg_keys.sh <number of clients> <IP of first client>
-    # change <number of clients> with the number of clients you will need
-    # change <IP of first client> with the address you prefer or leave it empty to use the default value
-    # example:
-    docker run --rm -it --name temp -v ./tools/create_wg_keys.sh:/opt/tools/create_wg_keys.sh wg:latest /opt/tools/create_wg_keys.sh 2 10.6.0.2/32
+    # create keys with the following command (replace values inside <>): 
+    docker run --rm -it --name temp -v ./tools/create_wg_keys.sh:/opt/tools/create_wg_keys.sh wg:latest /opt/tools/create_wg_keys.sh \
+        <number of nodes: number of clients +1 (the server) you will need> \
+        <wireguard server IP: address you prefer or leave it empty to use the default value '10.6.0.1/24'>
 
-    # copy the line below "base64 string with all keys" from the script output
+    # example:
+    docker run --rm -it --name temp -v ./tools/create_wg_keys.sh:/opt/tools/create_wg_keys.sh wg:latest /opt/tools/create_wg_keys.sh 3 10.6.0.1/32
+
+    # copy the line below "wg_keys_base64" from the script output. Use it to configure the server (input for Terraform)
+    # also copy the line below "base64 string with all keys" from the script output. Use it to configure the wireguard clients
     ```
 
 4. Create SSH keys.
@@ -167,7 +169,7 @@ Here we will create the `terraform/terraform.tfvars` file and explain how to obt
     pihole_dns_port              = "53"
     pihole_web_port              = "8080"
     wg_port                      = "51820"
-    wg_keys_base64               = "<base64 one-line string obained in step 1>"
+    wg_keys_base64               = "<base64 one-line string below 'wg_keys_base64' obained in step 3>"
     wg_server_private_key        = "<the content of the file 'server.privatekey' created in step 3>"
     wg_server_ip                 = "10.6.0.1/24"
     wg_server_port               = "51820"
@@ -234,14 +236,17 @@ Here we will create the `terraform/terraform.tfvars` file and explain how to obt
         The private key of the WireGuard server in OCI.  
         This value comes from the content of the `server.privatekey` file created in step 4.
     - **wg_server_ip**: [*Default:* `10.6.0.1/24`]  
-        IP of the WireGuard private network and mask.
+        IP of the WireGuard private network and mask.  
+        Overwritten if wg_keys_base64 is passed.
     - **wg_server_port**: [*Default:* `51820`]  
         WireGuard port inside the container.
     - **wg_client_public_key**: [*REQUIRED, unless wg_keys_base64 is passed*]  
         The public key of the WireGuard client.  
-        This value comes from the content of the `client.publickey` file created in step 4.
+        This value comes from the content of the `client.publickey` file created in step 4.  
+        Overwritten if wg_keys_base64 is passed.
     - **wg_client_ip**: [*Default:* `10.6.0.2/32`]  
-        The IP address of the WireGuard client assigned within the VPN network.
+        The IP address of the WireGuard client assigned within the VPN network.  
+        Overwritten if wg_keys_base64 is passed.
     - **tz**: [*Default:* `America/New_York`]  
         Time zone. You can see valid values for this variable by running this command in Linux/Mac `timedatectl list-timezones` or on [this](https://gist.github.com/adamgen/3f2c30361296bbb45ada43d83c1ac4e5#file-timedatectl-list-timezones) page.
     - **pihole_webpassword**: [*REQUIRED*]  
@@ -321,17 +326,42 @@ At this point, you have created the instance in OCI with Pi-hole and WireGuard c
 
 Download [WireGuard](https://www.wireguard.com/install/) on your device(s) and configure it as the `client`.
 
-Create a new empty tunnel (peer connection) with the following template and update it with the values from the [setup](#Setup) section:
+If you used the `create_wg_keys.sh` script in the [setup](#Setup) section, you can use the `create_wg_clients_config.sh` script to create WireGuard configuration for the clients:
+
+```shell
+# change file permission. needed if you get the following error:
+#   exec: "/opt/tools/create_wg_clients_config.sh": permission denied: unknown.
+chmod 0750 tools/create_wg_clients_config.sh
+
+# build WireGuard container
+docker build --tag wg:latest .
+
+# create keys with the following command (replace values inside <>):
+docker run --rm -it --name temp -v ./tools/create_wg_clients_config.sh:/opt/tools/create_wg_clients_config.sh wg:latest /opt/tools/create_wg_clients_config.sh \
+    --server-public-ip <'instance_public_ip' from the 'installation' section> \
+    --wg-server-port <default value: '51820'. Configure in step 6 of setup in variable 'wg_server_port'> \
+    --pihole-ip <default value: '10.7.107.101'. Configure in step 6 of setup in variable 'pihole_ip'> \
+    --wg-keys-base64 <base64 one-line string below 'base64 string with all keys' obained in step 3> \
+    --vpn-dns <default value: 'pihole' to use PiHole as DNS server. Use 'cloudfare' to use '1.1.1.1' as DNS server> \
+    --vpn-traffic <default value: 'dns' to send only DNS traffic to the VPN. Use 'all' to send all traffic to the VPN>
+
+# example using the required arguments only:
+docker run --rm -it --name temp -v ./tools/create_wg_clients_config.sh:/opt/tools/create_wg_clients_config.sh wg:latest /opt/tools/create_wg_clients_config.sh --server-public-ip 157.157.157.157 --wg-keys-base64 'X1NFUEFSQ....nQya009Cg=='
+
+# This will output the configuration for all clients both in plain text and QR code. You can scan the QR using the Wireguard app if possible, for example, using your phone.
+```
+
+You can also create a new empty tunnel (peer connection) with the following template and update it with the values from the [setup](#Setup) section:
 
 ```shell
 [Interface]
 PrivateKey = <content of the file 'client.privatekey'>
 Address = <'wg_client_ip' value from 'terraform/terraform.tfvars' without the network size ('/32')>/<network size of the 'wg_server_ip' value from 'terraform/terraform.tfvars'>
-DNS = <'pihole_ip' value from 'terraform/terraform.tfvars'>
+DNS = <'pihole_ip' value from 'terraform/terraform.tfvars'>/32
 
 [Peer]
 PublicKey = <content of the file server.publickey>
-AllowedIPs = <'wg_server_ip' value from 'terraform/terraform.tfvars'>, <'docker_compose_network_range' value from 'terraform/terraform.tfvars'>
+AllowedIPs = <'wg_server_ip' value from 'terraform/terraform.tfvars'>
 Endpoint = <'instance_public_ip' from the 'installation' section>:<'wg_port' value from 'terraform/terraform.tfvars'>
 ```
 
@@ -345,7 +375,7 @@ DNS = 10.7.107.101
 
 [Peer]
 PublicKey = BT3njAHyTQFNujOKIqHhpeCrHTjlbsvoBvwhsAiai0o=
-AllowedIPs = 10.6.0.1/24, 10.7.107.0/24
+AllowedIPs = 10.7.107.101/32
 Endpoint = 157.157.157.157:51820
 ```
 
