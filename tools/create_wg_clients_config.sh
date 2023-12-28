@@ -10,6 +10,8 @@ pihole_ip='10.7.107.101'
 vpn_dns='pihole'
 vpn_traffic='dns'
 cloudflare_dns_ip='1.1.1.1'
+out_format='text'
+client_n='all'
 
 while true; do
     case "$1" in
@@ -37,7 +39,18 @@ while true; do
             vpn_traffic=$2
             shift 2
         ;;
+        --out-format)
+            out_format=$2
+            shift 2
+        ;;
+        --client-n)
+            client_n=$2
+            shift 2
+        ;;
         *)
+            if [ -n "$1" ]; then
+                echo "Argument not valid: '$1'"
+            fi
             shift 1 || break
         ;;
     esac
@@ -46,11 +59,17 @@ done
 echo "server_public_ip: $server_public_ip"
 echo "wg_server_port: $wg_server_port"
 echo "pihole_ip: $pihole_ip"
-echo "wg_keys_base64: $wg_keys_base64"
+echo "wg_keys_base64: `echo $wg_keys_base64 | cut -c 0-50`..."
 echo "vpn_dns: $vpn_dns"
 echo "vpn_traffic: $vpn_traffic"
 
 # ----- main -----
+
+# install qrencode
+if [ $out_format == 'qr' ] || [ $out_format == 'all' ]; then
+    # apk update
+    which qrencode &>/dev/null || apk add libqrencode 1>/dev/null && echo "Installed qrencode"
+fi
 
 echo "$wg_keys_base64" | base64 -d > $wg_client_keys_file
 
@@ -59,7 +78,7 @@ separator_str=`sed -i -e '1 w /dev/stdout' -e '1d' $wg_client_keys_file`
 echo "separator string: $separator_str"
 echo
 
-if [ "$vpn_dns" == 'cloudfare' ]; then
+if [ "$vpn_dns" == 'cloudflare' ]; then
     dns_ip=$cloudflare_dns_ip
 else
     dns_ip=$pihole_ip
@@ -91,6 +110,10 @@ while read -r line; do
         continue
     fi
 
+    if [[ $client_n != 'all' ]] && [[ $wg_client_i != $client_n ]]; then
+        continue
+    fi
+
     # write wireguard client configuration
     echo "# wg_client_i: $wg_client_i" > $wg_clients_conf_file
     echo "[Interface]" >> $wg_clients_conf_file
@@ -103,13 +126,18 @@ while read -r line; do
     echo "AllowedIPs = ${client_allowed_ips}" >> $wg_clients_conf_file
     echo "Endpoint = ${server_public_ip}:${wg_server_port}" >> $wg_clients_conf_file
 
-    # print client wg config
-    echo "wg_client_i: $wg_client_i"
-    echo "----- START -----"
-    cat $wg_clients_conf_file
-    echo "----- END -----"
+    if [ $out_format == 'text' ] || [ $out_format == 'all' ]; then
+        # print client wg config
+        echo "wg_client_i: $wg_client_i"
+        echo "----- START -----"
+        cat $wg_clients_conf_file
+        echo "----- END -----"
+    fi
 
-    # print wireguard QR code for 
-    qrencode -t ansiutf8 < $wg_clients_conf_file
-    echo -e "\n\n"
+
+    if [ $out_format == 'qr' ] || [ $out_format == 'all' ]; then
+        # print wireguard QR code for 
+        qrencode -t ansiutf8 < $wg_clients_conf_file
+        echo -e "\n\n"
+    fi
 done < $wg_client_keys_file

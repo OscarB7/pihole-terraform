@@ -342,11 +342,13 @@ docker run --rm -it --name temp -v ./tools/create_wg_clients_config.sh:/opt/tool
     --wg-server-port <default value: '51820'. Configure in step 6 of setup in variable 'wg_server_port'> \
     --pihole-ip <default value: '10.7.107.101'. Configure in step 6 of setup in variable 'pihole_ip'> \
     --wg-keys-base64 <base64 one-line string below 'base64 string with all keys' obained in step 3> \
-    --vpn-dns <default value: 'pihole' to use PiHole as DNS server. Use 'cloudfare' to use '1.1.1.1' as DNS server> \
-    --vpn-traffic <default value: 'dns' to send only DNS traffic to the VPN. Use 'all' to send all traffic to the VPN>
+    --vpn-dns <default value: 'pihole' to use PiHole as DNS server. Use 'cloudflare' to use '1.1.1.1' as DNS server> \
+    --vpn-traffic <default value: 'dns' to send only DNS traffic to the VPN. Use 'all' to send all traffic to the VPN> \
+    --out-format <default value: 'text' to show configuration in text. Use 'qr' to show QR or 'all' to show both text and QR> \
+    --client-n <default value: 'all' to show configuration for all clients. Change to number of the client to show configuration, e.g. '2'>
 
 # example using the required arguments only:
-docker run --rm -it --name temp -v ./tools/create_wg_clients_config.sh:/opt/tools/create_wg_clients_config.sh wg:latest /opt/tools/create_wg_clients_config.sh --server-public-ip 157.157.157.157 --wg-keys-base64 'X1NFUEFSQ....nQya009Cg=='
+docker run --rm -it --name temp -v ./tools/create_wg_clients_config.sh:/opt/tools/create_wg_clients_config.sh wg:latest /opt/tools/create_wg_clients_config.sh --server-public-ip 157.157.157.157 --out-format all --wg-keys-base64 'X1NFUEFSQ....nQya009Cg==' --client-n 1
 
 # This will output the configuration for all clients both in plain text and QR code. You can scan the QR using the Wireguard app if possible, for example, using your phone.
 ```
@@ -380,6 +382,29 @@ Endpoint = 157.157.157.157:51820
 ```
 
 The value of AllowedIPs defines what traffic is sent through the VPN. Your device will send only the traffic for the WireGuard and Docker Compose networks through the VPN if you use the example's values. You can set it to `0.0.0.0/0` to send all traffic through the VPN.
+
+For MacOS clients with connection issues, try [this](https://www.reddit.com/r/WireGuard/comments/10a55y8/wireguard_not_working_on_macos_13_ventura) solution:
+
+- Install wireguard-go and wireguard-tools with brew in terminal:
+
+```brew install wireguard-go wireguard-tools```
+
+- Create the Wireguard config directory and move your config file (exported from the Appstore Wireguard app) to that directory:
+
+```sudo mkdir -p /usr/local/etc/wireguard```
+
+- Write your Wireguard configuartion in `wg.conf`; then move it Wireguard directory:
+
+```sudo mv wg.conf /usr/local/etc/wireguard/wg0.conf```
+
+- Activate Wireguard with your config:
+
+```sudo wg-quick up wg0```
+
+- To disconnect from Wireguard:
+
+```sudo wg-quick down wg0```
+
 
 ### SSH to the Server
 

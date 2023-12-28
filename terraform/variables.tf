@@ -237,6 +237,7 @@ variable "wg_server_port" {
 variable "wg_client_public_key" {
   type      = string
   sensitive = true
+  default   = ""
 }
 
 variable "wg_client_ip" {
