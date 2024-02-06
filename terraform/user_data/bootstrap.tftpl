@@ -6,6 +6,7 @@ apt-get update &>/opt/1_update_on_boot &&\
     apt-get -o "Dpkg::Options::=--force-confold" dist-upgrade -y --allow &>/opt/2_upgrade_on_boot &&\
     touch /opt/3_updated_on_boot
 cd /opt
+exit 1
 git clone https://github.com/OscarB7/pihole-terraform.git &>/opt/4_git_on_boot
 cd pihole-terraform/
 
