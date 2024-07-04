@@ -115,6 +115,7 @@ while read -r line; do
     fi
 
     # write wireguard client configuration
+    echo
     echo "# wg_client_i: $wg_client_i" > $wg_clients_conf_file
     echo "[Interface]" >> $wg_clients_conf_file
     echo "PrivateKey = ${wg_client_private_key}" >> $wg_clients_conf_file
