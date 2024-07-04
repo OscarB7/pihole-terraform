@@ -82,6 +82,7 @@ while read -r line; do
         echo "[Interface]" > $wg_conf_file
         echo "PrivateKey = ${wg_server_private_key}" >> $wg_conf_file
         echo "ListenPort = ${WG_SERVER_PORT}" >> $wg_conf_file
+        continue
     fi
 
     # add client to wg config file: wg_conf_file
@@ -91,14 +92,15 @@ while read -r line; do
     echo "AllowedIPs = ${wg_client_ip_address}" >> $wg_conf_file
 done < $wg_client_keys_file
 
+# ----- enable routing -----
+echo net.ipv4.ip_forward=1 | tee -a /etc/sysctl.conf
+echo net.ipv6.conf.all.forwarding=1 | tee -a /etc/sysctl.conf
+sysctl -p || echo 'could not update sysctl'
+
 # ----- create network interface -----
 ip link add wg0 type wireguard
 ip addr add ${wg_server_ip_address} dev wg0
 ip link set wg0 up
-
-# ----- configure and start wg server -----
-wg setconf wg0 $wg_conf_file
-wg
 
 # ----- set up iptables -----
 
@@ -106,7 +108,11 @@ wg
 docker_net_if=`ip r | grep -o "dev [^ ]*" | cut -d ' ' -f 2 | sort -u | grep -v wg0`
 
 # add iptables rules to forward traffic to Pi-hole
-iptables -t nat -A PREROUTING -d ${pihole_ip} -j ACCEPT -m comment --comment "Accept inbound traffic for Pi-hole"
-iptables -t nat -A POSTROUTING -o ${docker_net_if} -j MASQUERADE -m comment --comment "Allow outbound traffic to the docker network"
+iptables -t nat -A PREROUTING -d ${pihole_ip} -j ACCEPT -m comment --comment "Accept inbound traffic for Pi-hole"  || echo "Error: could not configure iptables PREROUTING"
+iptables -t nat -A POSTROUTING -o ${docker_net_if} -j MASQUERADE -m comment --comment "Allow outbound traffic to the docker network"  || echo "Error: could not configure iptables POSTROUTING"
+
+# ----- configure and start wg server -----
+wg setconf wg0 $wg_conf_file
+wg
 
 sleep infinity

@@ -180,8 +180,8 @@ locals {
 
 data "oci_core_images" "ubuntu_image" {
   compartment_id           = var.oci_tenancy_ocid
-  operating_system         = "Canonical Ubuntu"
-  operating_system_version = "22.04"
+  operating_system         = var.operating_system
+  operating_system_version = var.operating_system_version
   shape                    = var.instance_shape
   state                    = "AVAILABLE"
   sort_by                  = "TIMECREATED"
