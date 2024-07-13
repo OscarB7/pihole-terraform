@@ -208,6 +208,7 @@ resource "oci_core_instance" "new_instance" {
     user_data = base64encode(templatefile(
       "user_data/bootstrap.tftpl",
       {
+        git_branch                   = var.git_branch,
         docker_compose_version       = var.docker_compose_version,
         docker_network_range         = var.docker_network_range,
         docker_compose_network_range = var.docker_compose_network_range,

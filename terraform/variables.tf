@@ -190,6 +190,10 @@ variable "ssh_public_key" {
 
 # user data
 
+variable "git_branch" {
+  type      = string
+  default   = ""
+}
 
 variable "docker_compose_version" {
   type      = string
