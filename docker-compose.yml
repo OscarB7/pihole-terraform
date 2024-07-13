@@ -27,6 +27,7 @@ services:
       - pihole 
     build:
       context: proxy
+    image: nginx:latest
     networks:
       - private
     ports:
