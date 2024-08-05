@@ -180,8 +180,8 @@ locals {
 
 data "oci_core_images" "ubuntu_image" {
   compartment_id           = var.oci_tenancy_ocid
-  operating_system         = "Canonical Ubuntu"
-  operating_system_version = "20.04"
+  operating_system         = var.operating_system
+  operating_system_version = var.operating_system_version
   shape                    = var.instance_shape
   state                    = "AVAILABLE"
   sort_by                  = "TIMECREATED"
@@ -208,6 +208,7 @@ resource "oci_core_instance" "new_instance" {
     user_data = base64encode(templatefile(
       "user_data/bootstrap.tftpl",
       {
+        git_branch                   = var.git_branch,
         docker_compose_version       = var.docker_compose_version,
         docker_network_range         = var.docker_network_range,
         docker_compose_network_range = var.docker_compose_network_range,

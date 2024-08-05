@@ -1,5 +1,3 @@
-version: "3"
-
 services:
   wireguard:
     container_name: wireguard
@@ -29,6 +27,7 @@ services:
       - pihole 
     build:
       context: proxy
+    image: nginx:latest
     networks:
       - private
     ports:

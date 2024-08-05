@@ -139,6 +139,18 @@ variable "use_reserved_public_ip" {
   default   = false
 }
 
+# Image
+
+variable "operating_system" {
+  type      = string
+  default   = "Canonical Ubuntu"
+}
+
+variable "operating_system_version" {
+  type      = string
+  default   = "20.04"
+}
+
 # Instance
 
 variable "instance_shape" {
@@ -178,6 +190,10 @@ variable "ssh_public_key" {
 
 # user data
 
+variable "git_branch" {
+  type      = string
+  default   = ""
+}
 
 variable "docker_compose_version" {
   type      = string

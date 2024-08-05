@@ -4,7 +4,7 @@ WORKDIR /etc/wireguard
 RUN \
     apk update && \
     apk upgrade && \
-    apk add wireguard-tools
+    apk add wireguard-tools iptables
 
 ENV \
     WG_KEYS_BASE64='' \

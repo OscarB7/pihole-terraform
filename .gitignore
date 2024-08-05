@@ -9,6 +9,7 @@ docker-vol
 **/terraform.tfstate
 **/terraform.tfstate.backup
 **.tfvars
+**/*.txt
 **/*.pem
 **/*.crt
 proxy/certs

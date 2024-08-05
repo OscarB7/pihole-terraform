@@ -46,18 +46,18 @@ fi
 # get public IP of the wg server
 server_public_ip=`timeout 2 wget -q -O - https://ifconfig.co/ip`
 
-# skip this section if pihole_ip has a value already
-if [[ -z $pihole_ip ]]; then
-    # get Pi-hole IP address
-    while [[ -z $pihole_ip ]]; do
-        if timeout 5 ping -c 1 -W 2 ${DNS_CONTAINER_NAME} &>/dev/null; then
-            pihole_ip=`ping -c 1 -W 2 ${DNS_CONTAINER_NAME} | grep -o "[0-9]*\.[0-9]*\.[0-9]*\.[0-9]*" | head -n 1`
-        fi
-        echo "cannot resolve '${DNS_CONTAINER_NAME}' yet..."
-        sleep 1
-    done
-    echo "Pi-hole IP: $pihole_ip"
-fi
+# # skip this section if pihole_ip has a value already
+# if [[ -z $pihole_ip ]]; then
+#     # get Pi-hole IP address
+#     while [[ -z $pihole_ip ]]; do
+#         if timeout 5 ping -c 1 -W 2 ${DNS_CONTAINER_NAME} &>/dev/null; then
+#             pihole_ip=`ping -c 1 -W 2 ${DNS_CONTAINER_NAME} | grep -o "[0-9]*\.[0-9]*\.[0-9]*\.[0-9]*" | head -n 1`
+#         fi
+#         echo "cannot resolve '${DNS_CONTAINER_NAME}' yet..."
+#         sleep 1
+#     done
+#     echo "Pi-hole IP: $pihole_ip"
+# fi
 
 
 # ----- set up wg config files -----
@@ -82,6 +82,7 @@ while read -r line; do
         echo "[Interface]" > $wg_conf_file
         echo "PrivateKey = ${wg_server_private_key}" >> $wg_conf_file
         echo "ListenPort = ${WG_SERVER_PORT}" >> $wg_conf_file
+        continue
     fi
 
     # add client to wg config file: wg_conf_file
@@ -95,10 +96,7 @@ done < $wg_client_keys_file
 ip link add wg0 type wireguard
 ip addr add ${wg_server_ip_address} dev wg0
 ip link set wg0 up
-
-# ----- configure and start wg server -----
-wg setconf wg0 $wg_conf_file
-wg
+ip route add ${wg_server_ip_address} dev wg0
 
 # ----- set up iptables -----
 
@@ -106,7 +104,13 @@ wg
 docker_net_if=`ip r | grep -o "dev [^ ]*" | cut -d ' ' -f 2 | sort -u | grep -v wg0`
 
 # add iptables rules to forward traffic to Pi-hole
-iptables -t nat -A PREROUTING -d ${pihole_ip} -j ACCEPT -m comment --comment "Accept inbound traffic for Pi-hole"
-iptables -t nat -A POSTROUTING -o ${docker_net_if} -j MASQUERADE -m comment --comment "Allow outbound traffic to the docker network"
+# iptables -A FORWARD -i wg0 -j ACCEPT
+# iptables -A FORWARD -o wg0 -j ACCEPT
+# iptables -t nat -I PREROUTING -d ${pihole_ip} -j ACCEPT
+iptables -t nat -I POSTROUTING -o ${docker_net_if} -j MASQUERADE
+
+# ----- configure and start wg server -----
+wg setconf wg0 $wg_conf_file
+wg
 
 sleep infinity
