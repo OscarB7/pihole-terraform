@@ -57,19 +57,20 @@ cidr=`echo $ip_server | sed "s|${network_id}.${first_host_id}/||"`
 
 # recreate ip_server
 ip_server_recreated="${network_id}.${first_host_id}/${cidr}"
+ip_server_cidr=$cidr
 cidr=$cidr_clients
 
 
 if [[ "$ip_server_recreated" == "$ip_server" ]]; then
     echo "ip_server parsed correctly."
 else
-    echo "ip_server not parsed correctly. Current value: ${ip_server}"
+    echo "ERROR: ip_server not parsed correctly. Current value: ${ip_server}"
     exit 1
 fi
 
 # check ip_server does not end in /32
-if [[ "$cidr" == "32" ]]; then
-    echo "ip_server cidr cannot be /32. Current value: ${ip_server}"
+if [[ "$ip_server_cidr" == "32" ]]; then
+    echo "ERROR: ip_server cidr cannot be /32. Current value: ${ip_server}"
     exit 1
 fi
 
