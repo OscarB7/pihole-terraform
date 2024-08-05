@@ -113,7 +113,7 @@ Here we will create the `terraform/terraform.tfvars` file and explain how to obt
         <wireguard server IP: address you prefer or leave it empty to use the default value '10.6.0.1/24'>
 
     # example:
-    docker run --rm -it --name temp -v ./tools/create_wg_keys.sh:/opt/tools/create_wg_keys.sh wg:latest /opt/tools/create_wg_keys.sh 3 10.6.0.1/32
+    docker run --rm -it --name temp -v ./tools/create_wg_keys.sh:/opt/tools/create_wg_keys.sh wg:latest /opt/tools/create_wg_keys.sh 3 10.6.0.1/24
 
     # copy the line below "wg_keys_base64" from the script output. Use it to configure the server (input for Terraform)
     # also copy the line below "base64 string with all keys" from the script output. Use it to configure the wireguard clients

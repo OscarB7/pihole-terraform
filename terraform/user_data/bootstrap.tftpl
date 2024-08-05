@@ -10,9 +10,11 @@ cd /opt
 git clone https://github.com/OscarB7/pihole-terraform.git &>/opt/4_git_on_boot
 cd pihole-terraform/
 
-if [[ -n "$git_branch" ]]; then
-    echo "changing to branch: $git_branch" &>/opt/4_git_on_boot
-    git checkout $git_branch &>/opt/4_git_on_boot
+if [[ -n "${git_branch}" ]]; then
+    echo "changing to branch: ${git_branch}" &>/opt/4_git_on_boot
+    git checkout ${git_branch} &>/opt/4_git_on_boot
+else
+    echo "staying in master branch. git_branch=${git_branch}" &>/opt/4_git_on_boot
 fi
 
 # create dot env file for setup_host.sh script and docker compose

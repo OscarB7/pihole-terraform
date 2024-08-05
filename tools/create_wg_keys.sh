@@ -63,8 +63,14 @@ cidr=$cidr_clients
 if [[ "$ip_server_recreated" == "$ip_server" ]]; then
     echo "ip_server parsed correctly."
 else
-    ip_server=$ip_server_default
-    echo "ip_server not parsed correctly. Using default value: ${ip_server}"
+    echo "ip_server not parsed correctly. Current value: ${ip_server}"
+    exit 1
+fi
+
+# check ip_server does not end in /32
+if [[ "$cidr" == "32" ]]; then
+    echo "ip_server cidr cannot be /32. Current value: ${ip_server}"
+    exit 1
 fi
 
 echo "creating keys for $n_clients clients"

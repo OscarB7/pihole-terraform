@@ -11,6 +11,11 @@ nameserver 1.1.1.1
 nameserver 1.0.0.1
 EOF
 
+# enable routing
+echo net.ipv4.ip_forward=1 | tee -a /etc/sysctl.conf
+echo net.ipv6.conf.all.forwarding=1 | tee -a /etc/sysctl.conf
+sysctl -p || echo 'could not update sysctl'
+
 # load environment variables if needed
 [[ -e '.env' ]] && source .env
 
