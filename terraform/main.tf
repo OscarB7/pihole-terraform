@@ -208,6 +208,7 @@ resource "oci_core_instance" "new_instance" {
     user_data = base64encode(templatefile(
       "user_data/bootstrap.tftpl",
       {
+        git_repo_url                 = var.git_repo_url,
         git_branch                   = var.git_branch,
         docker_compose_version       = var.docker_compose_version,
         docker_network_range         = var.docker_network_range,
@@ -225,6 +226,10 @@ resource "oci_core_instance" "new_instance" {
         tz                           = var.tz,
         pihole_webpassword           = var.pihole_webpassword,
         pihole_dns_ip                = var.pihole_dns_ip
+        cloudflared_ip               = var.cloudflared_ip
+        cloudflared_dns_port         = var.cloudflared_dns_port
+        cloudflared_metric_port      = var.cloudflared_metric_port
+        nginx_ip                     = var.nginx_ip
       }
     ))
   }

@@ -7,7 +7,7 @@ apt-get update &>/opt/1_update_on_boot &&\
     touch /opt/3_updated_on_boot
 cd /opt
 
-git clone https://github.com/OscarB7/pihole-terraform.git &>/opt/4_git_on_boot
+git clone ${git_repo_url} &>/opt/4_git_on_boot
 cd pihole-terraform/
 
 if [[ -n "${git_branch}" ]]; then
@@ -42,6 +42,14 @@ WG_CLIENT_IP=${wg_client_ip}
 TZ=${tz}
 PIHOLE_WEBPASSWORD=${pihole_webpassword}
 PIHOLE_DNS_IP=${pihole_dns_ip}
+
+## ----- cloudflared -----
+CLOUDFLARED_IP=${cloudflared_ip}
+CLOUDFLARED_DNS_PORT=${cloudflared_dns_port}
+CLOUDFLARED_METRIC_PORT=${cloudflared_metric_port}
+
+## ----- nginx -----
+NGINX_IP=${nginx_ip}
 EOF
 
 # set up instance

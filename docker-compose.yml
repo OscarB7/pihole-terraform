@@ -29,7 +29,8 @@ services:
       context: proxy
     image: nginx:latest
     networks:
-      - private
+      private:
+        ipv4_address: ${NGINX_IP:-10.7.107.10}
     ports:
       - "443:443"
       - "80:80"
@@ -38,9 +39,11 @@ services:
   pihole:
     container_name: pihole
     image: pihole/pihole:latest
+    depends_on:
+      - cloudflared
     networks:
       private:
-        ipv4_address: ${PIHOLE_IP:-172.23.0.101}
+        ipv4_address: ${PIHOLE_IP:-10.7.107.101}
     ports:
       - "${PIHOLE_DNS_PORT:-53}:53/tcp"
       - "${PIHOLE_DNS_PORT:-53}:53/udp"
@@ -56,6 +59,24 @@ services:
       - NET_ADMIN
     restart: unless-stopped
 
+  cloudflared:
+    container_name: cloudflared
+    image: cloudflare/cloudflared:latest
+    command: proxy-dns --address 0.0.0.0 --port ${CLOUDFLARED_DNS_PORT} --upstream https://1.1.1.1/dns-query --upstream https://1.0.0.1/dns-query --metrics 0.0.0.0:${CLOUDFLARED_METRIC_PORT}
+    networks:
+      private:
+        ipv4_address: ${CLOUDFLARED_IP:-10.7.107.111}
+    ports:
+      - "${CLOUDFLARED_DNS_PORT:-5053}:5053"
+      - "${CLOUDFLARED_METRIC_PORT:-8053}:8053"
+    restart: unless-stopped
+    healthcheck:
+      test: ["dig", "@${CLOUDFLARED_IP}", "-p", "5053", "google.com"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 20s
+      start_interval: 5s
 
 networks:
   private:

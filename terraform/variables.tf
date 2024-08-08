@@ -190,6 +190,11 @@ variable "ssh_public_key" {
 
 # user data
 
+variable "git_repo_url" {
+  type      = string
+  default   = "https://github.com/OscarB7/pihole-terraform.git"
+}
+
 variable "git_branch" {
   type      = string
   default   = ""
@@ -274,4 +279,24 @@ variable "pihole_webpassword" {
 variable "pihole_dns_ip" {
   type      = string
   default   = "1.1.1.1"
+}
+
+variable "cloudflared_ip" {
+  type      = string
+  default   = "10.7.107.111"
+}
+
+variable "cloudflared_dns_port" {
+  type      = string
+  default   = "5053"
+}
+
+variable "cloudflared_metric_port" {
+  type      = string
+  default   = "8053"
+}
+
+variable "nginx_ip" {
+  type      = string
+  default   = "10.7.107.10"
 }

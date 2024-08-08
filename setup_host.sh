@@ -49,7 +49,7 @@ docker-compose up -d
 
 ## cron jobs to update server and containers
 cat << EOF > /tmp/update_jobs
-0 3 * * 6    export DEBIAN_FRONTEND=noninteractive && apt update && apt -o Dpkg::Options::="--force-confold" upgrade -q -y && apt -o Dpkg::Options::="--force-confold" dist-upgrade -q -y && apt autoremove -q -y
+0 3 * * 6    export DEBIAN_FRONTEND=noninteractive && apt update && apt -o "Dpkg::Options::=--force-confold" upgrade -y && apt -o "Dpkg::Options::=--force-confold" dist-upgrade -y && apt autoremove -y
 0 4 * * 6    cd /opt/pihole-terraform/ && docker-compose pull pihole && docker-compose up --force-recreate --build -d && docker image prune -f
 EOF
 
