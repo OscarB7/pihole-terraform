@@ -177,7 +177,9 @@ Here we will create the `terraform/terraform.tfvars` file and explain how to obt
     wg_client_ip                 = "10.6.0.2/32"
     tz                           = "America/New_York"
     pihole_webpassword           = "<generate a strong password. Avoid these characters: '=' and ';'>"
-    pihole_dns_ip                = "1.1.1.1"
+    pihole_dns_ip                = "10.7.107.111#5053"
+    cloudflared_ip               = "10.7.107.111"
+    nginx_ip                     = "10.7.107.10"
     
     # Base/Shared resources (OPTIONAL)
     oci_vcn_id              = "<ID of an already existing VCN in case you want to use it; otherwise, a new one will be created>"
@@ -211,6 +213,10 @@ Here we will create the `terraform/terraform.tfvars` file and explain how to obt
     - **ssh_public_key**: [*REQUIRED*]  
         SSH public key.  
         This value comes from the content of the `id_rsa.pub` file created in step 4.
+    - **git_repo_url**: [*Default:* `https://github.com/OscarB7/pihole-terraform.git`]  
+        URL of the git repo used in bootstrap (this repo).
+    - **git_branch**: [*Default:* `<empty>`]  
+        Branch of the git repo used in bootstrap (this repo). If empty, it uses the main branch.
     - **use_reserved_public_ip**: [*Default:* `false`]  
         Create a reserved public IP, which is an independent resource from the instance.  
         If set to `true`, this IP will be attached to the instance; therefore, if the instance is recreated, the public IP will not change.  
@@ -256,6 +262,14 @@ Here we will create the `terraform/terraform.tfvars` file and explain how to obt
         DNS server sed by Pi-hole.
         You can set more than one by separating DNS servers with `,` and leaving no spaces around it.
         You can specify the port of the DNS service by adding `#<port>` after the IP, e.g., `10.7.107.111#5053;1.1.1.1`
+    - **cloudflared_ip**: [*Default:* `10.7.107.111`]  
+        IP of Cloudflared container used for DNS over HTTPS.
+    - **cloudflared_dns_port**: [*Default:* `5053`]  
+        DNS port of Cloudflared container used for DNS over HTTPS.
+    - **cloudflared_metric_port**: [*Default:* `8053`]  
+        Web port of Cloudflared container.
+    - **nginx_ip**: [*Default:* `10.7.107.10`]  
+        IP of NGINX container used for HTTPS.
 
     &nbsp;  
     The default values will work fine unless the IP ranges overlap with your existing network.
@@ -462,7 +476,6 @@ Password: 6V5!B6J!2FxM*$PJ#KP*aEN^%
 - Add more than one client to the WireGuard server.
 - Add budget or spending limit for OCI in case of unexpected charges.
 - Run process in the containers as non-root.
-- Add Cloudflare container for Pi-hole to use DNS over HTTPS.
 - Create a key to encrypt boot volume. kmsKeyId
 
 See the [open issues](https://github.com/OscarB7/pihole-terraform/issues) for a complete list of proposed features (and known issues).
