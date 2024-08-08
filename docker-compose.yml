@@ -29,8 +29,9 @@ services:
       context: proxy
     image: nginx:latest
     networks:
-      private:
-        ipv4_address: ${NGINX_IP:-10.7.107.10}
+      - private
+      # private:
+      #   ipv4_address: ${NGINX_IP:-10.7.107.10}
     ports:
       - "443:443"
       - "80:80"
@@ -70,13 +71,6 @@ services:
       - "${CLOUDFLARED_DNS_PORT:-5053}:5053"
       - "${CLOUDFLARED_METRIC_PORT:-8053}:8053"
     restart: unless-stopped
-    healthcheck:
-      test: ["dig", "@${CLOUDFLARED_IP}", "-p", "5053", "google.com"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 20s
-      start_interval: 5s
 
 networks:
   private:
